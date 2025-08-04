@@ -10,10 +10,6 @@ interface displayFile {
   rating: "sfw" | "nsfw";
 }
 
-interface displayFileDB extends Omit<displayFile, "rating"> {
-  rating: number; // 0 SFW, 1 NSFW
-}
-
 interface metadataRow {
   id: string;
   value: string;
@@ -103,33 +99,12 @@ export async function getDisplayFile(id: number): Promise<displayFile> {
     const query = `SELECT * FROM displayFiles WHERE id=${id}`;
 
     return new Promise((resolve, reject) => {
-      db.get(query, (err: Error, row: displayFileDB) => {
+      db.get(query, (err: Error, row: displayFile) => {
         if (err) {
           console.error("Error in getDisplayFile():", err.message);
           reject(err);
         } else if (row == undefined) {
           reject(new Error(`File with '${id}' not found in the database.`));
-        }
-        resolve({
-          ...row,
-          rating: row.rating ? "nsfw" : "sfw",
-        });
-      });
-    });
-  });
-}
-
-export async function getMetadataValue(id: string) {
-  return _execOperationDB(async (db: Database) => {
-    const query = `SELECT * FROM metadata WHERE id=${id}`;
-
-    return new Promise((resolve, reject) => {
-      db.get(query, (err: Error, row: metadataRow) => {
-        if (err) {
-          console.error("Error in getMetadataValue():", err.message);
-          reject(err);
-        } else if (row == undefined) {
-          reject(new Error(`Metadata with '${id}' not found in the database.`));
         }
         resolve(row);
       });
@@ -137,22 +112,56 @@ export async function getMetadataValue(id: string) {
   });
 }
 
-export async function addDisplayFilesToDB(
-  files: Array<displayFile>
-): Promise<null> {
+export async function getMaxDisplayFileID(): Promise<number> {
+  return _execOperationDB(async (db: Database) => {
+    const query = `SELECT MAX(id) FROM displayFiles`;
+
+    return new Promise((resolve, reject) => {
+      db.get(query, (err: Error, row: { id: number }) => {
+        if (err) {
+          console.error("Error in getMaxDisplayFileID():", err.message);
+          reject(err);
+        } else if (row == undefined) {
+          reject(
+            new Error(
+              `Something went wrong while fetching max display file ID.`
+            )
+          );
+        }
+        resolve(row.id);
+      });
+    });
+  });
+}
+
+export async function getMetadataValue(id: string) {
+  return _execOperationDB(async (db: Database) => {
+    const query = `SELECT value FROM metadata WHERE id=${id}`;
+
+    return new Promise((resolve, reject) => {
+      db.get(query, (err: Error, row: metadataRow) => {
+        if (err) {
+          console.error("Error in getMetadataValue():", err.message);
+          reject(err);
+        }
+        resolve(row);
+      });
+    });
+  });
+}
+
+export async function addDisplayFileToDB(file: displayFile): Promise<null> {
   return _execOperationDB(async (db: Database) => {
     const query = `INSERT INTO displayFiles(artist, file, path, type, rating) VALUES(?,?,?,?,?)`;
 
     return new Promise((resolve, reject) => {
       db.serialize(() => {
-        files.forEach((value) => {
-          db.run(query, _objectToArrayDF(value), (err) => {
-            if (err) {
-              console.error("Error inserting new row to displayFiles table!");
-              reject(err);
-            }
-            resolve(null);
-          });
+        db.run(query, _objectToArrayDF(file), (err) => {
+          if (err) {
+            console.error("Error inserting new row to displayFiles table!");
+            reject(err);
+          }
+          resolve(null);
         });
       });
     });
@@ -193,6 +202,26 @@ export async function updateMetadataValueDB(
           if (err) {
             console.error(
               `Error updating row with id ${id} to metadata table!`
+            );
+            reject(err);
+          }
+          resolve(null);
+        });
+      });
+    });
+  });
+}
+
+export async function updateDisplayFilesToDB(file: displayFile): Promise<null> {
+  return _execOperationDB(async (db: Database) => {
+    const query = `UPDATE displayFiles SET artist=${file.artist}, file=${file.file}, path=${file.path}, type=${file.type}, rating=${file.rating} WHERE id=${file.id}`;
+
+    return new Promise((resolve, reject) => {
+      db.serialize(() => {
+        db.run(query, (err) => {
+          if (err) {
+            console.error(
+              `Error updating row ${file.id} to displayFiles table!`
             );
             reject(err);
           }
