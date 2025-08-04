@@ -1,13 +1,71 @@
 let currentVisibleID = "A";
 const fadeDelay = 2900;
+const slideInterval = 10;
+const windowHeight = document.getElementById("img-container").clientHeight;
+const windowWidth = document.getElementById("img-container").clientWidth;
+
+function getClassList(elementID) {
+  return document.getElementById(elementID).classList;
+}
 
 function triggerFadeIn(elementID) {
-  document.getElementById(elementID).classList.remove("fadeInImage");
-  document.getElementById(elementID).classList.add("fadeInImage");
+  getClassList(elementID).remove("fadeInImage");
+  getClassList(elementID).add("fadeInImage");
 }
 function triggerFadeOut(elementID) {
-  document.getElementById(elementID).classList.remove("fadeOutImage");
-  document.getElementById(elementID).classList.add("fadeOutImage");
+  getClassList(elementID).remove("fadeOutImage");
+  getClassList(elementID).add("fadeOutImage");
+}
+
+function setImgDimensions(elementID) {
+  const element = document.getElementById(elementID);
+  const height = element.naturalHeight;
+  const width = element.naturalWidth;
+  //console.log(`Height: ${element.naturalHeight}`);
+  //console.log(`Width: ${element.naturalHeight}`);
+  if (height < windowHeight && width < windowWidth) {
+    if (height > width) {
+      element.style.height = "100%";
+      element.style.width = "auto";
+      //element.height = window.screen.availHeight;
+      //element.removeAttribute("width");
+    } else {
+      element.style.width = "100%";
+      element.style.height = "auto";
+    }
+  } else {
+    element.style.height = "auto";
+    element.style.width = "auto";
+  }
+}
+
+function setImgPosition(elementID) {
+  const element = document.getElementById(elementID);
+  const height = element.clientHeight;
+  const width = element.clientWidth;
+
+  const diffHeight = windowHeight - height;
+  const diffWidth = windowWidth - width;
+
+  if (diffHeight == 0) {
+    element.style.setProperty("top", "0px", "important");
+  } else if (diffHeight > 0) {
+    element.style.setProperty(
+      "top",
+      Math.floor(diffHeight / 2).toString() + "px",
+      "important"
+    );
+  }
+
+  if (diffWidth == 0) {
+    element.style.setProperty("left", "0px", "important");
+  } else if (diffWidth > 0) {
+    element.style.setProperty(
+      "left",
+      Math.floor(diffWidth / 2).toString() + "px",
+      "important"
+    );
+  }
 }
 
 function slideHandler() {
@@ -25,24 +83,32 @@ function slideHandler() {
 
   triggerFadeOut(fadeOutID);
   window.setTimeout(() => {
-    document.getElementById(fadeOutID).classList.add("hidden");
-    document.getElementById(fadeOutID).classList.remove("fadeOutImage");
+    getClassList(fadeOutID).add("hidden");
+    getClassList(fadeOutID).remove("fadeOutImage");
   }, fadeDelay);
 
+  setImgDimensions(fadeInID);
+  setImgPosition(fadeInID);
   triggerFadeIn(fadeInID);
   window.setTimeout(() => {
-    document.getElementById(fadeInID).classList.remove("hidden");
-    document.getElementById(fadeInID).classList.remove("fadeInImage");
+    getClassList(fadeInID).remove("hidden");
+    getClassList(fadeInID).remove("fadeInImage");
   }, fadeDelay);
 }
 
 function initPage() {
-  document.getElementById("img-A").classList.add("fadeInImage");
+  console.log(window.screen.availHeight);
+  console.log(window.screen.availWidth);
+  setImgDimensions("img-A");
+  setImgPosition("img-A");
+  setImgDimensions("img-B");
+
+  getClassList("img-A").add("fadeInImage");
   window.setTimeout(() => {
-    document.getElementById("img-A").classList.remove("hidden");
-    document.getElementById("img-A").classList.remove("fadeInImage");
+    getClassList("img-A").remove("hidden");
+    getClassList("img-A").remove("fadeInImage");
   }, fadeDelay);
 }
 
 initPage();
-window.setInterval(slideHandler, 10 * 1000);
+window.setInterval(slideHandler, slideInterval * 1000);
