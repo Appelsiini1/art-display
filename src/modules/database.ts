@@ -94,6 +94,47 @@ export async function initDatabase() {
   });
 }
 
+export async function getRandomDisplayFile(
+  rating: "all" | string = "all"
+): Promise<displayFile> {
+  return _execOperationDB(async (db: Database) => {
+    let query = "SELECT path FROM displayFiles";
+
+    switch (rating) {
+      case "sfw":
+        query += 'WHERE rating="sfw" AND';
+        break;
+      case "nsfw":
+        query += 'WHERE rating="nsfw" AND';
+        break;
+
+      default:
+        query += "WHERE";
+        break;
+    }
+    query +=
+      " id > (ABS(RANDOM()) % (SELECT max(id) FROM displayFiles)) LIMIT 1";
+
+    return new Promise((resolve, reject) => {
+      let round = 1;
+      while (1) {
+        db.get(query, (err: Error, row: displayFile) => {
+          if (err) {
+            console.error("Error in getDisplayFile():", err.message);
+            reject(err);
+          } else if (row != undefined) {
+            resolve(row);
+          }
+          round += 1;
+          console.warn(
+            `getRandomDisplayFile(): Row was undefined, starting round ${round}.`
+          );
+        });
+      }
+    });
+  });
+}
+
 export async function getDisplayFile(id: number): Promise<displayFile> {
   return _execOperationDB(async (db: Database) => {
     const query = `SELECT * FROM displayFiles WHERE id=${id}`;
@@ -138,7 +179,7 @@ export async function getMetadataValue(id: string) {
   return _execOperationDB(async (db: Database) => {
     const query = `SELECT value FROM metadata WHERE id=${id}`;
 
-    return new Promise((resolve, reject) => {
+    return new Promise<metadataRow>((resolve, reject) => {
       db.get(query, (err: Error, row: metadataRow) => {
         if (err) {
           console.error("Error in getMetadataValue():", err.message);

@@ -6,6 +6,7 @@ import {
   getDisplayFile,
   getMaxDisplayFileID,
   getMetadataValue,
+  getRandomDisplayFile,
   updateDisplayFilesToDB,
   updateMetadataValueDB,
 } from "./modules/database";
@@ -43,10 +44,8 @@ app.get("/img", query("id").trim().notEmpty().isInt(), async (req, res) => {
 
 app.get("/img/random", async (req, res) => {
   try {
-    const maxID = await getMaxDisplayFileID();
-    const randomID = getRandomIntInclusive(0, maxID);
-
-    const imgInfo = await getDisplayFile(randomID);
+    const rating = await getMetadataValue("currentRating");
+    const imgInfo = await getRandomDisplayFile(rating.value);
 
     getFile(res, imgInfo.path);
   } catch (err: any) {
