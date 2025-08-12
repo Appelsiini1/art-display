@@ -4,14 +4,13 @@ import { query, validationResult, checkSchema } from "express-validator";
 import {
   addMetadataValueDB,
   getDisplayFile,
-  getMaxDisplayFileID,
   getMetadataValue,
   getRandomDisplayFile,
   updateDisplayFilesToDB,
   updateMetadataValueDB,
 } from "./modules/database";
 import { displayFileSchema, displayFileSchemaUpdate } from "./models/schemas";
-import { getFile, getRandomIntInclusive } from "./modules/util";
+import { getFile } from "./modules/util";
 
 const PORT = 9000;
 const app = express();
