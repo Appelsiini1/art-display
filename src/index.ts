@@ -10,7 +10,7 @@ import {
   updateMetadataValueDB,
 } from "./modules/database";
 import { displayFileSchema, displayFileSchemaUpdate } from "./models/schemas";
-import { getBase64String, getRandomIntInclusive } from "./modules/util";
+import { getFile, getRandomIntInclusive } from "./modules/util";
 
 const PORT = 9000;
 const app = express();
@@ -31,9 +31,7 @@ app.get("/img", query("id").trim().notEmpty().isInt(), async (req, res) => {
   try {
     if (result.isEmpty()) {
       const imgInfo = await getDisplayFile(req.query?.id);
-      const base64Img = getBase64String(imgInfo.path);
-
-      res.status(200).send({ ...imgInfo, base64: base64Img });
+      getFile(res, imgInfo.path);
     } else {
       res.status(400).send("Invalid request.");
     }
@@ -49,9 +47,8 @@ app.get("/img/random", async (req, res) => {
     const randomID = getRandomIntInclusive(0, maxID);
 
     const imgInfo = await getDisplayFile(randomID);
-    const base64Img = getBase64String(imgInfo.path);
 
-    res.status(200).send({ ...imgInfo, base64: base64Img });
+    getFile(res, imgInfo.path);
   } catch (err: any) {
     res.status(500).send("Internal Server Error");
     console.error(err.message);

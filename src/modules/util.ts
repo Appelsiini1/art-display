@@ -1,11 +1,11 @@
 import fs from "node:fs";
 import path from "node:path";
+import { Response } from "express";
 
-export function getBase64String(filepath: string): string {
+function getMIMEType(filepath: string): string {
   try {
-    const data = fs.readFileSync(filepath, "base64");
     const extension = path.extname(filepath);
-    let dataString = `data:image/`;
+    let dataString = `image/`;
     switch (extension.replace(".", "")) {
       case "png":
         dataString += "png";
@@ -25,10 +25,9 @@ export function getBase64String(filepath: string): string {
       default:
         throw new Error("error_unsupported_image");
     }
-    dataString += `;base64,${data}`;
     return dataString;
   } catch (err: any) {
-    console.error("Error in getBase64String():", err.message);
+    console.error("Error in getMIMEType():", err.message);
     throw err;
   }
 }
@@ -38,4 +37,23 @@ export function getRandomIntInclusive(min: number, max: number) {
   const minCeiled = Math.ceil(min);
   const maxFloored = Math.floor(max);
   return Math.floor(Math.random() * (maxFloored - minCeiled + 1) + minCeiled); // The maximum is inclusive and the minimum is inclusive
+}
+
+export async function getFile(res: Response, filepath: string) {
+  return new Promise((resolve, reject) => {
+    try {
+      const { size } = fs.statSync(filepath);
+      const rs = fs.createReadStream(filepath);
+      res.setHeader("Content-Type", getMIMEType(filepath));
+      res.setHeader("Content-Length", size);
+      rs.pipe(res);
+
+      rs.on("end", () => {
+        resolve(null);
+      });
+    } catch (err: any) {
+      console.error(err.message);
+      reject(null);
+    }
+  });
 }
