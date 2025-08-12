@@ -3,6 +3,7 @@ const fadeDelay = 2900;
 const slideInterval = 10;
 const windowHeight = document.getElementById("img-container").clientHeight;
 const windowWidth = document.getElementById("img-container").clientWidth;
+const apiURL = "";
 
 function getClassList(elementID) {
   return document.getElementById(elementID).classList;
@@ -15,6 +16,19 @@ function triggerFadeIn(elementID) {
 function triggerFadeOut(elementID) {
   getClassList(elementID).remove("fadeOutImage");
   getClassList(elementID).add("fadeOutImage");
+}
+
+function getImage(elementID) {
+  try {
+    fetch(new Request(apiURL + "/img/random"))
+      .then((response) => response.blob())
+      .then((myBlob) => {
+        const objectURL = URL.createObjectURL(myBlob);
+        document.getElementById(elementID).src = objectURL;
+      });
+  } catch (err) {
+    console.error(err.message);
+  }
 }
 
 function setImgDimensions(elementID) {
@@ -110,5 +124,19 @@ function initPage() {
   }, fadeDelay);
 }
 
+function imageGetInit() {
+  window.setInterval(() => {
+    switch (currentVisibleID) {
+      case "A":
+        getImage("img-B");
+        break;
+      case "B":
+        getImage("img-A");
+        break;
+    }
+  }, slideInterval * 1000);
+}
+
 initPage();
 window.setInterval(slideHandler, slideInterval * 1000);
+window.setTimeout(imageGetInit, (slideInterval / 2) * 1000);
