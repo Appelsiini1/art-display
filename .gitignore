@@ -128,3 +128,6 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+public/assets/a.jpg
+public/assets/b.jpg
+public/assets/Thumbs.db
