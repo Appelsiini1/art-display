@@ -8,13 +8,6 @@ export const displayFileSchema: Schema = {
     trim: true,
     in: ["body"],
   },
-  file: {
-    isString: true,
-    optional: false,
-    notEmpty: true,
-    trim: true,
-    in: ["body"],
-  },
   path: {
     isString: true,
     optional: false,

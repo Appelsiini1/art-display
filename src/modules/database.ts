@@ -4,7 +4,6 @@ import path from "node:path";
 interface displayFile {
   id: number;
   artist: string;
-  file: string;
   path: string;
   type: string;
   rating: "sfw" | "nsfw";
@@ -16,7 +15,7 @@ interface metadataRow {
 }
 
 function _objectToArrayDF(obj: displayFile): Array<number | string> {
-  return [obj.artist, obj.file, obj.path, obj.type, obj.rating];
+  return [obj.artist, obj.path, obj.type, obj.rating];
 }
 
 function _openDB(): Promise<sqlite3.Database> {
@@ -27,7 +26,6 @@ function _openDB(): Promise<sqlite3.Database> {
         console.error("Error in _openDB():", err.message);
         reject(err);
       } else {
-        //log.info("Connected to the database.");
         resolve(db);
       }
     });
@@ -69,7 +67,6 @@ export async function initDatabase() {
       `CREATE TABLE IF NOT EXISTS displayFiles (
         id INTEGER PRIMARY KEY,
         artist TEXT,
-        file TEXT NOT NULL,
         path TEXT NOT NULL,
         type TEXT NOT NULL,  
         rating TEXT NOT NULL,
@@ -193,7 +190,7 @@ export async function getMetadataValue(id: string) {
 
 export async function addDisplayFileToDB(file: displayFile): Promise<null> {
   return _execOperationDB(async (db: Database) => {
-    const query = `INSERT INTO displayFiles(artist, file, path, type, rating) VALUES(?,?,?,?,?)`;
+    const query = `INSERT INTO displayFiles(artist, path, type, rating) VALUES(?,?,?,?)`;
 
     return new Promise((resolve, reject) => {
       db.serialize(() => {
@@ -255,7 +252,7 @@ export async function updateMetadataValueDB(
 
 export async function updateDisplayFilesToDB(file: displayFile): Promise<null> {
   return _execOperationDB(async (db: Database) => {
-    const query = `UPDATE displayFiles SET artist=${file.artist}, file=${file.file}, path=${file.path}, type=${file.type}, rating=${file.rating} WHERE id=${file.id}`;
+    const query = `UPDATE displayFiles SET artist=${file.artist}, path=${file.path}, type=${file.type}, rating=${file.rating} WHERE id=${file.id}`;
 
     return new Promise((resolve, reject) => {
       db.serialize(() => {
