@@ -1,5 +1,5 @@
 from sys import exit
-from client_lib import add_file
+from client_lib import add_file, update_file
 from dotenv import load_dotenv
 
 def menu():
@@ -21,14 +21,18 @@ def menu():
 def main():
 
     selection = -1
+    init_dir = "C:/"
 
     while selection != 0:
         selection = menu()
 
         if (selection == 1):
-            pass
+            init_dir = add_file(init_dir)
+            if not init_dir:
+                init_dir = "C:/"
         elif (selection == 2):
-            pass
+            img_id = input("Image ID to update: ")
+            update_file(img_id)
         elif (selection == 3):
             pass
         elif (selection == 4):
