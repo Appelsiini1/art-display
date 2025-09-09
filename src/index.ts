@@ -2,10 +2,12 @@ import express, { Request, Response } from "express";
 import path from "node:path";
 import { query, validationResult, checkSchema } from "express-validator";
 import {
+  addDisplayFileToDB,
   addMetadataValueDB,
   getDisplayFile,
   getMetadataValue,
   getRandomDisplayFile,
+  initDatabase,
   updateDisplayFilesToDB,
   updateMetadataValueDB,
 } from "./modules/database";
@@ -17,13 +19,40 @@ const app = express();
 
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.json());
-app.use((req, res) => {
+/* app.use((req, res) => {
   res.status(404);
   res.send("<h1>Error 404: Resource not found.</h1>");
+}); */
+initDatabase().then(() => {
+  app.listen(PORT, () =>
+    console.log(`Server online at http://localhost:${PORT}`)
+  );
 });
 
-app.listen(PORT, () =>
-  console.log(`Server online at http://localhost:${PORT}`)
+//URL/img?id=value
+app.get(
+  "/img/file",
+  query("id").trim().notEmpty().isInt(),
+  async (req, res) => {
+    const result = validationResult(req);
+    try {
+      if (result.isEmpty()) {
+        const imgInfo = await getDisplayFile(req.query?.id);
+        if (typeof imgInfo == "number") {
+          res
+            .status(404)
+            .send(`File with '${req.query?.id}' not found in the database.`);
+        } else {
+          getFile(res, imgInfo.path);
+        }
+      } else {
+        res.status(400).send("Invalid request.");
+      }
+    } catch (err: any) {
+      res.status(500).send("Internal Server Error");
+      console.error(err.message);
+    }
+  }
 );
 
 app.get("/img", query("id").trim().notEmpty().isInt(), async (req, res) => {
@@ -31,13 +60,25 @@ app.get("/img", query("id").trim().notEmpty().isInt(), async (req, res) => {
   try {
     if (result.isEmpty()) {
       const imgInfo = await getDisplayFile(req.query?.id);
-      getFile(res, imgInfo.path);
+      if (typeof imgInfo == "number") {
+        res
+          .status(404)
+          .send(`File with '${req.query?.id}' not found in the database.`);
+      } else {
+        res.status(200).json(imgInfo);
+      }
     } else {
       res.status(400).send("Invalid request.");
     }
   } catch (err: any) {
-    res.status(500).send("Internal Server Error");
-    console.error(err.message);
+    if (err.message == -1) {
+      res
+        .status(404)
+        .send(`File with '${req.query?.id}' not found in the database.`);
+    } else {
+      res.status(500).send("Internal Server Error");
+      console.error(err.message);
+    }
   }
 });
 
@@ -60,7 +101,7 @@ app.post(
     try {
       const result = validationResult(req);
       if (result.isEmpty()) {
-        const rq_body = req.body();
+        const rq_body = req.body;
         await updateDisplayFilesToDB(rq_body);
         res.status(200).send("Operation successful.");
       } else {
@@ -80,8 +121,8 @@ app.post(
     try {
       const result = validationResult(req);
       if (result.isEmpty()) {
-        const rq_body = req.body();
-        await updateDisplayFilesToDB(rq_body);
+        const rq_body = req.body;
+        await addDisplayFileToDB(rq_body);
         res.status(200).send("Operation successful.");
       } else {
         res.status(400).send("Invalid request.");
