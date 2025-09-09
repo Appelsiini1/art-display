@@ -19,7 +19,7 @@ function _objectToArrayDF(obj: displayFile): Array<number | string> {
 }
 
 function _openDB(): Promise<sqlite3.Database> {
-  const dbPath = path.join("../", "database", "database.db");
+  const dbPath = path.join("database", "database.db");
   return new Promise((resolve, reject) => {
     const db = new sqlite3.Database(dbPath, (err) => {
       if (err) {
@@ -57,6 +57,7 @@ async function _execOperationDB<T>(
     return result;
   } catch (err: any) {
     console.error("Error in _execOperationDB():", err.message);
+    console.error(err.stack);
     throw err;
   }
 }
@@ -69,11 +70,11 @@ export async function initDatabase() {
         artist TEXT,
         path TEXT NOT NULL,
         type TEXT NOT NULL,  
-        rating TEXT NOT NULL,
+        rating TEXT NOT NULL
     )`,
       `CREATE TABLE IF NOT EXISTS metadata (
         id TEXT PRIMARY KEY,
-        value TEXT,
+        value TEXT
     )`,
     ];
     await Promise.all(
@@ -132,7 +133,9 @@ export async function getRandomDisplayFile(
   });
 }
 
-export async function getDisplayFile(id: number): Promise<displayFile> {
+export async function getDisplayFile(
+  id: number
+): Promise<displayFile | number> {
   return _execOperationDB(async (db: Database) => {
     const query = `SELECT * FROM displayFiles WHERE id=${id}`;
 
@@ -142,7 +145,7 @@ export async function getDisplayFile(id: number): Promise<displayFile> {
           console.error("Error in getDisplayFile():", err.message);
           reject(err);
         } else if (row == undefined) {
-          reject(new Error(`File with '${id}' not found in the database.`));
+          resolve(-1);
         }
         resolve(row);
       });
@@ -194,7 +197,9 @@ export async function addDisplayFileToDB(file: displayFile): Promise<null> {
 
     return new Promise((resolve, reject) => {
       db.serialize(() => {
-        db.run(query, _objectToArrayDF(file), (err) => {
+        const parameters = _objectToArrayDF(file);
+        console.log(parameters);
+        db.run(query, parameters, (err) => {
           if (err) {
             console.error("Error inserting new row to displayFiles table!");
             reject(err);
