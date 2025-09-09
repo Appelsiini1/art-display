@@ -56,7 +56,7 @@ def add_file(inital_dir:str):
                 print(f"Server responded with HTTP {response.status_code}. '{response.reason}', '{response.text}'")
                 break
             else:
-                print(f"OK - {file}")
+                print(f"OK - {path.basename(replace_win_path(file))}")
     except ConnectionError as e:
         print("Connection error occured: ", e)
         return
