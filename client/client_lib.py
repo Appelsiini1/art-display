@@ -12,7 +12,7 @@ def get_api():
     return api
 
 def replace_win_path(path:str):
-    return path.replace("R:", "/mnt/r")
+    return path.replace("R:/", "")
 
 
 def add_file(inital_dir:str):
@@ -66,34 +66,39 @@ def update_file(img_id:str):
     api = get_api()
     
     try:
-        response = requests.post(api+"/img", {"id":img_id}, timeout=5)
+        response = requests.get(api+"/img", {"id":img_id}, timeout=5)
         response.raise_for_status()
+        
     except (ConnectionError, requests.HTTPError) as e:
         print("Connection error occured: ", e)
         return
-    
-    artist = input("New artist (empty for no update): ")
-    path = input("New path (empty for no update): ")
-    type_img = input("New type (empty for no update): ")
+    resp = response.json()
+    print("Current data: ")
+    pprint(resp)
+
+    artist = input("New artist (empty for no update): ").strip()
+    path = input("New path (empty for no update): ").strip()
+    type_img = input("New type (empty for no update): ").strip()
     while True:
-        rating = input("New rating (empty for no update): ").lower()
+        rating = input("New rating (empty for no update): ").lower().strip()
         if rating not in ["sfw", "nsfw", ""]:
             print("Only 'sfw' or 'nsfw' value allowed.")
         else:
             break
 
-    resp = response.json()
+    
     metadata = {
         "id" : img_id,
-        "artist": artist.strip() if artist.strip() != resp["artist"] else resp["artist"],
-        "path": replace_win_path(path.strip()) if path.strip() != resp["path"] else resp["path"],
-        "type": type_img.strip() if type_img.strip() != resp["type"] else resp["type"],
-        "rating": rating.strip() if rating.strip() != resp["rating"] else resp["rating"],
+        "artist": artist if (artist != resp["artist"]) and artist != ""  else resp["artist"],
+        "path": replace_win_path(path) if path != resp["path"] and path != "" else resp["path"],
+        "type": type_img if type_img != resp["type"] and type_img != "" else resp["type"],
+        "rating": rating if rating != resp["rating"] and rating != "" else resp["rating"],
     }
 
     try:
         response = requests.post(api+"/database/update", json=metadata, timeout=5)
         response.raise_for_status()
+        print("File updated.")
     except (ConnectionError, requests.HTTPError) as e:
         print("Connection error occured: ", e)
         return
