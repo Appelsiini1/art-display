@@ -131,3 +131,13 @@ dist
 public/assets/a.jpg
 public/assets/b.jpg
 public/assets/Thumbs.db
+
+# ts-node
+src/*.js
+src/*/*.js
+
+#python
+__pycache__
+
+#database
+database
