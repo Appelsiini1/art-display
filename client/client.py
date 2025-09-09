@@ -1,5 +1,5 @@
 from sys import exit
-from client_lib import add_file, update_file
+from client_lib import add_file, update_file, metadata_value, get_metadata_value, get_display_value
 from dotenv import load_dotenv
 
 def menu():
@@ -7,8 +7,9 @@ def menu():
     print("1) Add file to database")
     print("2) Modify file in database")
     print("3) Delete file from database") # not implemented on server yet
-    print("4) Add metadata value")
-    print("5) Modify metadata value")
+    print("4) Add/Update settings value")
+    print("5) Get settings value")
+    print("6) Get display file metadata")
     print("0) Exit")
     while True:
         user_in = input("Selection: ")
@@ -34,17 +35,20 @@ def main():
             img_id = input("Image ID to update: ")
             update_file(img_id)
         elif (selection == 3):
-            pass
+            print("Not implemented.")
         elif (selection == 4):
-            pass
+            metadata_value()
         elif (selection == 5):
-            pass
+            get_metadata_value()
+        elif (selection == 6):
+            get_display_value()
         elif (selection == 0):
             print("Exiting...")
             exit(0)
         else:
             print("Unknown selection.")
+        print()
 
 if __name__ == "__main__" :
-    load_dotenv("./.env")
+    load_dotenv(verbose=True)
     main()

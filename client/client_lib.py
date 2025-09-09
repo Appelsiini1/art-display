@@ -1,16 +1,28 @@
-from tkinter import filedialog
+from tkinter import filedialog, Tk
 import requests
 from os import path, getenv
+from pprint import pprint
 
 FILETYPES = (("Image files", [".png", ".jpg", ".jpeg", ".gif"]),)
 
-def add_file(inital_dir:str):
-    api = getenv("API_URL")
+def get_api():
+    api = getenv("IMG_API_URL")
     if api == None:
-        print("No server api URL defined.")
-        return
+        raise ValueError("No server api URL defined.")
+    return api
+
+def replace_win_path(path:str):
+    return path.replace("R:", "/mnt/r")
+
+
+def add_file(inital_dir:str):
+    api = get_api()
     
+    root = Tk()
+    root.wm_attributes('-topmost', 1)
+    root.withdraw()
     file_selections = filedialog.askopenfilenames(initialdir=inital_dir, title="Select file(s) to add", filetypes=FILETYPES)
+    root.destroy()
     if not file_selections:
         print("No files selected or operation canceled.")
         return
@@ -32,10 +44,9 @@ def add_file(inital_dir:str):
 
     try:
         for file in file_selections:
-            # Path prefix removal!!
             metadata = {
                 "artist": artist,
-                "path": file,
+                "path": replace_win_path(file.strip()),
                 "type": type_in,
                 "rating": rating
             }
@@ -52,10 +63,7 @@ def add_file(inital_dir:str):
     return path.dirname(file_selections[0])
   
 def update_file(img_id:str):
-    api = getenv("API_URL")
-    if api == None:
-        print("No server api URL defined.")
-        return
+    api = get_api()
     
     try:
         response = requests.post(api+"/img", {"id":img_id}, timeout=5)
@@ -78,13 +86,58 @@ def update_file(img_id:str):
     metadata = {
         "id" : img_id,
         "artist": artist.strip() if artist.strip() != resp["artist"] else resp["artist"],
-        "path": path.strip() if path.strip() != resp["path"] else resp["path"],
+        "path": replace_win_path(path.strip()) if path.strip() != resp["path"] else resp["path"],
         "type": type_img.strip() if type_img.strip() != resp["type"] else resp["type"],
         "rating": rating.strip() if rating.strip() != resp["rating"] else resp["rating"],
     }
 
     try:
         response = requests.post(api+"/database/update", json=metadata, timeout=5)
-    except ConnectionError as e:
+        response.raise_for_status()
+    except (ConnectionError, requests.HTTPError) as e:
+        print("Connection error occured: ", e)
+        return
+
+
+def metadata_value():
+    api = get_api()
+    
+    name = input("Key: ")
+    value = input("Value: ")
+
+    try:
+        response = requests.post(api+"/metadata", {"id":name, "value": value}, timeout=5)
+        response.raise_for_status()
+    except (ConnectionError, requests.HTTPError) as e:
+        print("Connection error occured: ", e)
+        return
+    print("Value added/updated.")
+
+def get_metadata_value():
+    api = get_api()
+    
+    name = input("Key: ")
+
+    try:
+        response = requests.get(api+"/metadata/get", {"name":name}, timeout=5)
+        response.raise_for_status()
+        rp_json = response.json()
+        print(f"ID: {rp_json["id"]}, Value: {rp_json["value"]}")
+    except (ConnectionError, requests.HTTPError) as e:
+        print("Connection error occured: ", e)
+        return
+    print("Value added/updated.")
+
+def get_display_value():
+    api = get_api()
+
+    ID = input("File ID: ")
+
+    try:
+        response = requests.get(api+"/img", {"id":ID}, timeout=5)
+        response.raise_for_status()
+        rp_json = response.json()
+        pprint(rp_json)
+    except (ConnectionError, requests.HTTPError) as e:
         print("Connection error occured: ", e)
         return
