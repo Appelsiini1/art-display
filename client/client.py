@@ -24,6 +24,7 @@ def main():
     selection = -1
     init_dir = "C:/"
 
+    print("Display file database client\n")
     while selection != 0:
         selection = menu()
 
