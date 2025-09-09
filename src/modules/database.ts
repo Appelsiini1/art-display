@@ -237,7 +237,7 @@ export async function updateMetadataValueDB(
   value: string
 ): Promise<null> {
   return _execOperationDB(async (db: Database) => {
-    const query = `UPDATE metadata SET value=${value} WHERE id=${id}`;
+    const query = `UPDATE metadata SET value="${value}" WHERE id=${id}`;
 
     return new Promise((resolve, reject) => {
       db.serialize(() => {
@@ -257,7 +257,7 @@ export async function updateMetadataValueDB(
 
 export async function updateDisplayFilesToDB(file: displayFile): Promise<null> {
   return _execOperationDB(async (db: Database) => {
-    const query = `UPDATE displayFiles SET artist=${file.artist}, path=${file.path}, type=${file.type}, rating=${file.rating} WHERE id=${file.id}`;
+    const query = `UPDATE displayFiles SET artist="${file.artist}", path="${file.path}", type="${file.type}", rating="${file.rating}" WHERE id=${file.id}`;
 
     return new Promise((resolve, reject) => {
       db.serialize(() => {
