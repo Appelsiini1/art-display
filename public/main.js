@@ -3,7 +3,7 @@ const fadeDelay = 2900;
 const slideInterval = 10;
 const windowHeight = document.getElementById("img-container").clientHeight;
 const windowWidth = document.getElementById("img-container").clientWidth;
-const apiURL = "";
+const apiURL = "http://localhost:9000";
 
 function getClassList(elementID) {
   return document.getElementById(elementID).classList;
