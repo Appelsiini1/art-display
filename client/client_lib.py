@@ -4,6 +4,19 @@ from os import path, getenv
 from pprint import pprint
 
 FILETYPES = (("Image files", [".png", ".jpg", ".jpeg", ".gif"]),)
+IMAGE_TYPES = (
+    "Pinup",
+    "Porn",
+    "Waist-up",
+    "Comic",
+    "Bust",
+    "Fullbody",
+    "Scene",
+    "Photoshoot",
+    "Chibi",
+    "Wallpaper",
+    "Other",
+)
 
 
 def get_api():
@@ -15,6 +28,31 @@ def get_api():
 
 def replace_win_path(path: str):
     return path.replace("R:/", "")
+
+
+def generate_img_type_print():
+    txt = ""
+    for i in range(1, len(IMAGE_TYPES) + 1):
+        txt += f"{i}) {IMAGE_TYPES[i-1]}"
+    return txt
+
+
+def ask_type(prompt: str, allow_empty=False):
+    print(generate_img_type_print())
+    print(prompt, end="")
+    type_name = ""
+    while True:
+        type_in = input()
+        if type_in == "" and allow_empty:
+            break
+        if type_in not in range(1, len(IMAGE_TYPES) + 1):
+            print("Type index out of bounds. Try again.")
+        elif not type_in.isnumeric():
+            print("Type index is not a number.")
+        else:
+            type_name = IMAGE_TYPES[int(type_in) - 1]
+            break
+    return type_name
 
 
 def add_file(inital_dir: str):
@@ -44,7 +82,7 @@ def add_file(inital_dir: str):
         else:
             break
 
-    type_in = input("Image type: ")
+    type_in = ask_type("Image type index: ")
 
     try:
         for file in file_selections:
@@ -85,7 +123,7 @@ def update_file(img_id: str):
 
     artist = input("New artist (empty for no update): ").strip()
     path = input("New path (empty for no update): ").strip()
-    type_img = input("New type (empty for no update): ").strip()
+    type_img = ask_type("New type index (empty for no update): ", True).strip()
     while True:
         rating = input("New rating (empty for no update): ").lower().strip()
         if rating not in ["sfw", "nsfw", ""]:
