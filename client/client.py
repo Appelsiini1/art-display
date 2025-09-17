@@ -22,16 +22,16 @@ def menu():
 def main():
 
     selection = -1
-    init_dir = "C:/"
+    init_dir = ""
 
     print("Display file database client\n")
     while selection != 0:
         selection = menu()
 
         if (selection == 1):
-            init_dir = add_file(init_dir)
-            if not init_dir:
-                init_dir = "C:/"
+            back_dir = add_file(init_dir)
+            if back_dir:
+                init_dir = back_dir
         elif (selection == 2):
             img_id = input("Image ID to update: ")
             update_file(img_id)
