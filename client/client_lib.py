@@ -4,18 +4,20 @@ from os import path, getenv
 from pprint import pprint
 
 FILETYPES = (("Image files", [".png", ".jpg", ".jpeg", ".gif"]),)
-IMAGE_TYPES = (
-    "Pinup",
-    "Porn",
-    "Waist-up",
-    "Comic",
-    "Bust",
-    "Fullbody",
-    "Scene",
-    "Photoshoot",
-    "Chibi",
-    "Wallpaper",
-    "Other",
+IMAGE_TYPES = sorted(
+    (
+        "Pinup",
+        "Porn",
+        "Waist-up",
+        "Comic",
+        "Bust",
+        "Fullbody",
+        "Scene",
+        "Photoshoot",
+        "Chibi",
+        "Wallpaper",
+        "Other",
+    )
 )
 
 
@@ -33,22 +35,24 @@ def replace_win_path(path: str):
 def generate_img_type_print():
     txt = ""
     for i in range(1, len(IMAGE_TYPES) + 1):
-        txt += f"{i}) {IMAGE_TYPES[i-1]}"
+        txt += f"{i}) {IMAGE_TYPES[i-1]}\n"
     return txt
 
 
 def ask_type(prompt: str, allow_empty=False):
-    print(generate_img_type_print())
-    print(prompt, end="")
+    print(generate_img_type_print(), end="")
     type_name = ""
     while True:
-        type_in = input()
+        type_in = input(prompt)
         if type_in == "" and allow_empty:
             break
-        if type_in not in range(1, len(IMAGE_TYPES) + 1):
-            print("Type index out of bounds. Try again.")
+        elif type_in == "" and not allow_empty:
+            print("Type index cannot be empty when adding.")
         elif not type_in.isnumeric():
             print("Type index is not a number.")
+        elif int(type_in) not in list(range(1, len(IMAGE_TYPES) + 1)):
+            print("Type index out of bounds. Try again.")
+
         else:
             type_name = IMAGE_TYPES[int(type_in) - 1]
             break
