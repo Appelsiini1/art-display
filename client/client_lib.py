@@ -2,6 +2,7 @@ from tkinter import filedialog, Tk
 import requests
 from os import path, getenv
 from pprint import pprint
+from typing import Literal
 
 FILETYPES = (("Image files", [".png", ".jpg", ".jpeg", ".gif"]),)
 IMAGE_TYPES = sorted(
@@ -21,6 +22,40 @@ IMAGE_TYPES = sorted(
 )
 
 
+#   artist: string;
+#   path: string;
+#   type: string;
+#   rating: "sfw" | "nsfw";
+class DISPLAY_FILE:
+    def __init__(
+        self,
+        artist: str,
+        path: str,
+        type: Literal[
+            "Pinup",
+            "Porn",
+            "Waist-up",
+            "Comic",
+            "Bust",
+            "Fullbody",
+            "Scene",
+            "Photoshoot",
+            "Chibi",
+            "Wallpaper",
+            "Other",
+            "",
+        ],
+        rating: str,
+    ) -> None:
+        self.artist = artist
+        self.path = path
+        self.type = type
+        self.rating = rating
+
+    def __str__(self) -> str:
+        return f"Artist: {self.artist}\nPath: {self.path}\nType: {self.type}\nRating: {self.rating}"
+
+
 def get_api():
     api = getenv("IMG_API_URL")
     if api == None:
@@ -37,6 +72,17 @@ def generate_img_type_print():
     for i in range(1, len(IMAGE_TYPES) + 1):
         txt += f"{i}) {IMAGE_TYPES[i-1]}\n"
     return txt
+
+
+def ask_filename(initial_dir: str):
+    root = Tk()
+    root.wm_attributes("-topmost", 1)
+    root.withdraw()
+    file_selections = filedialog.askopenfilenames(
+        initialdir=initial_dir, title="Select file(s) to add", filetypes=FILETYPES
+    )
+    root.destroy()
+    return file_selections
 
 
 def ask_type(prompt: str, allow_empty=False):
@@ -59,24 +105,14 @@ def ask_type(prompt: str, allow_empty=False):
     return type_name
 
 
-def add_file(inital_dir: str):
+def add_file(initial_dir: str):
     api = get_api()
 
-    root = Tk()
-    root.wm_attributes("-topmost", 1)
-    root.withdraw()
-    file_selections = filedialog.askopenfilenames(
-        initialdir=inital_dir, title="Select file(s) to add", filetypes=FILETYPES
-    )
-    root.destroy()
+    file_selections = ask_filename(initial_dir)
     if not file_selections:
         print("No files selected or operation canceled.")
         return
 
-    #   artist: string;
-    #   path: string;
-    #   type: string;
-    #   rating: "sfw" | "nsfw";
     artist = input("Artist name: ")
 
     while True:
@@ -86,14 +122,27 @@ def add_file(inital_dir: str):
         else:
             break
 
-    type_in = ask_type("Image type index: ")
+    type_name = ask_type("Image type index: ")
+    df = DISPLAY_FILE(
+        artist,
+        "(multiple values)" if len(file_selections) > 1 else file_selections[0],  # type: ignore
+        type_name,
+        rating,
+    )
+
+    print()
+    print(str(df))
+    confirm = input("Confirm selections (y/n): ")
+    if confirm.strip() != "y" and confirm.strip() != "":
+        print("Operation canceled.")
+        return
 
     try:
         for file in file_selections:
             metadata = {
                 "artist": artist,
                 "path": replace_win_path(file.strip()),
-                "type": type_in,
+                "type": type_name,
                 "rating": rating,
             }
 
@@ -108,7 +157,7 @@ def add_file(inital_dir: str):
     except ConnectionError as e:
         print("Connection error occured: ", e)
         return
-    return path.dirname(file_selections[0])
+    return path.dirname(file_selections[0])  # type: ignore
 
 
 def update_file(img_id: str):
