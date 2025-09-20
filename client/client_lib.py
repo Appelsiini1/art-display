@@ -105,36 +105,34 @@ def ask_filename(initial_dir: str):
 
 
 def check_menu_selection(
-    selection: str,
+    base_selection: str,
     prompt: str,
     allow_empty: bool,
     selection_list: list,
     previous: PREVIOUS_PROPERTY,
 ):
-    result = False
+    selection = base_selection
     if not allow_empty and selection and not selection.isdigit():
         try:
-            previous.prop = str(selection_list.index(type_in) + 1)  # type: ignore
-            type_in = previous.prop
+            previous.prop = str(selection_list.index(selection) + 1)  # type: ignore
+            selection = previous.prop
         except ValueError:
-            print("Unknown value, try again.")
-            return False
+            raise ValueError("Unknown value, try again.")
     elif not allow_empty and selection and selection.isdigit():
         previous.prop = selection
     if selection == "" and allow_empty:
         pass
     elif selection == "" and not allow_empty:
-        print(f"{prompt} cannot be empty when adding.")
+        raise ValueError(f"{prompt} cannot be empty when adding.")
     elif not selection.isnumeric():
-        print(f"{prompt} is not a number.")
+        raise ValueError(f"{prompt} is not a number.")
     elif int(selection) not in list(range(1, len(selection_list) + 1)):
-        print(f"{prompt} out of bounds. Try again.")
-    else:
-        result = True
-    return result
+        raise ValueError(f"{prompt} out of bounds. Try again.")
+    return selection
 
 
 def ask_type(prompt: str, allow_empty=False):
+    print("Type:")
     print(generate_menu_print(IMAGE_TYPES), end="")
     type_name = ""
     while True:
@@ -147,11 +145,15 @@ def ask_type(prompt: str, allow_empty=False):
             else input(prompt)
         )
 
-        res = check_menu_selection(
-            type_in, "Type selection", allow_empty, IMAGE_TYPES, PREV_TYPE_IN
-        )
+        try:
+            res = check_menu_selection(
+                type_in, "Type selection", allow_empty, IMAGE_TYPES, PREV_TYPE_IN
+            )
+        except ValueError as e:
+            print(e)
+            continue
         if res:
-            type_name = IMAGE_TYPES[int(type_in) - 1]
+            type_name = IMAGE_TYPES[int(res) - 1]
             break
     return type_name
 
@@ -172,15 +174,21 @@ def ask_with_previous(prompt: str, prev: str):
 def ask_rating():
     while True:
         print("Rating:")
-        print(generate_menu_print(RATING))
+        print(generate_menu_print(RATING), end="")
         tmp = ask_with_previous(
             "Rating number",
             RATING[int(PREV_RATING.prop) - 1] if PREV_RATING.prop else "",
         )
-        res = check_menu_selection(tmp, "Rating selection", False, RATING, PREV_RATING)
-        if res:
-            rating = RATING[int(tmp)]
-            break
+
+        try:
+            res = check_menu_selection(
+                tmp, "Rating selection", False, RATING, PREV_RATING
+            )
+        except ValueError as e:
+            print(e)
+            continue
+        rating = RATING[int(res) - 1]
+        break
     return rating
 
 
@@ -194,10 +202,14 @@ def add_file(initial_dir: str):
 
     artist = ask_with_previous("Artist name", PREV_ARTIST.prop)
     PREV_ARTIST.prop = artist
+    print()
 
     rating = ask_rating()
+    print()
 
     type_name = ask_type("Image type index")
+    print()
+
     df = DISPLAY_FILE(
         artist,
         "(multiple values)" if len(file_selections) > 1 else file_selections[0],  # type: ignore
@@ -205,7 +217,6 @@ def add_file(initial_dir: str):
         rating,
     )
 
-    print()
     print(str(df))
     confirm = input("Confirm selections (y/n): ")
     if confirm.strip() != "y" and confirm.strip() != "":
