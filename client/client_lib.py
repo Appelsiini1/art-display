@@ -56,6 +56,23 @@ class DISPLAY_FILE:
         return f"Artist: {self.artist}\nPath: {self.path}\nType: {self.type}\nRating: {self.rating}"
 
 
+class PREVIOUS_PROPERTY:
+    def __init__(self, value) -> None:
+        self.prop = value
+
+    @property
+    def prop(self):
+        return self._prop
+
+    @prop.setter
+    def prop(self, value):
+        self._prop = value
+
+
+PREV_ARTIST = PREVIOUS_PROPERTY("")
+PREV_TYPE_IN = PREVIOUS_PROPERTY(0)
+
+
 def get_api():
     api = getenv("IMG_API_URL")
     if api == None:
@@ -89,7 +106,25 @@ def ask_type(prompt: str, allow_empty=False):
     print(generate_img_type_print(), end="")
     type_name = ""
     while True:
-        type_in = input(prompt)
+        type_in = (
+            ask_with_previous(
+                prompt,
+                IMAGE_TYPES[int(PREV_TYPE_IN.prop) - 1] if PREV_TYPE_IN.prop else "",
+            )
+            if not allow_empty
+            else input(prompt)
+        )
+
+        if not allow_empty and type_in and not type_in.isdigit():
+            try:
+                PREV_TYPE_IN.prop = str(IMAGE_TYPES.index(type_in) + 1)  # type: ignore
+                type_in = PREV_TYPE_IN.prop
+            except ValueError:
+                print("Unknown value, try again.")
+                continue
+        elif not allow_empty and type_in and type_in.isdigit():
+            PREV_TYPE_IN.prop = type_in
+
         if type_in == "" and allow_empty:
             break
         elif type_in == "" and not allow_empty:
@@ -105,6 +140,19 @@ def ask_type(prompt: str, allow_empty=False):
     return type_name
 
 
+def ask_with_previous(prompt: str, prev: str):
+    prop = ""
+    if not prev:
+        prop = input(f"{prompt}: ")
+    else:
+        tmp = input(f"{prompt} (empty for '{prev}'): ")
+        if not tmp:
+            prop = prev
+        else:
+            prop = tmp
+    return prop
+
+
 def add_file(initial_dir: str):
     api = get_api()
 
@@ -113,7 +161,8 @@ def add_file(initial_dir: str):
         print("No files selected or operation canceled.")
         return
 
-    artist = input("Artist name: ")
+    artist = ask_with_previous("Artist name", PREV_ARTIST.prop)
+    PREV_ARTIST.prop = artist
 
     while True:
         rating = input("Rating (sfw | nsfw): ").lower()
@@ -122,7 +171,7 @@ def add_file(initial_dir: str):
         else:
             break
 
-    type_name = ask_type("Image type index: ")
+    type_name = ask_type("Image type index")
     df = DISPLAY_FILE(
         artist,
         "(multiple values)" if len(file_selections) > 1 else file_selections[0],  # type: ignore
