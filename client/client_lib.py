@@ -20,6 +20,7 @@ IMAGE_TYPES = sorted(
         "Other",
     )
 )
+RATING = ["sfw", "nsfw"]
 
 
 #   artist: string;
@@ -71,6 +72,7 @@ class PREVIOUS_PROPERTY:
 
 PREV_ARTIST = PREVIOUS_PROPERTY("")
 PREV_TYPE_IN = PREVIOUS_PROPERTY(0)
+PREV_RATING = PREVIOUS_PROPERTY(0)
 
 
 def get_api():
@@ -84,10 +86,10 @@ def replace_win_path(path: str):
     return path.replace("R:/", "")
 
 
-def generate_img_type_print():
+def generate_menu_print(menu_list: list | tuple):
     txt = ""
-    for i in range(1, len(IMAGE_TYPES) + 1):
-        txt += f"{i}) {IMAGE_TYPES[i-1]}\n"
+    for i in range(1, len(menu_list) + 1):
+        txt += f"{i}) {menu_list[i-1]}\n"
     return txt
 
 
@@ -102,8 +104,38 @@ def ask_filename(initial_dir: str):
     return file_selections
 
 
+def check_menu_selection(
+    selection: str,
+    prompt: str,
+    allow_empty: bool,
+    selection_list: list,
+    previous: PREVIOUS_PROPERTY,
+):
+    result = False
+    if not allow_empty and selection and not selection.isdigit():
+        try:
+            previous.prop = str(selection_list.index(type_in) + 1)  # type: ignore
+            type_in = previous.prop
+        except ValueError:
+            print("Unknown value, try again.")
+            return False
+    elif not allow_empty and selection and selection.isdigit():
+        previous.prop = selection
+    if selection == "" and allow_empty:
+        pass
+    elif selection == "" and not allow_empty:
+        print(f"{prompt} cannot be empty when adding.")
+    elif not selection.isnumeric():
+        print(f"{prompt} is not a number.")
+    elif int(selection) not in list(range(1, len(selection_list) + 1)):
+        print(f"{prompt} out of bounds. Try again.")
+    else:
+        result = True
+    return result
+
+
 def ask_type(prompt: str, allow_empty=False):
-    print(generate_img_type_print(), end="")
+    print(generate_menu_print(IMAGE_TYPES), end="")
     type_name = ""
     while True:
         type_in = (
@@ -115,26 +147,10 @@ def ask_type(prompt: str, allow_empty=False):
             else input(prompt)
         )
 
-        if not allow_empty and type_in and not type_in.isdigit():
-            try:
-                PREV_TYPE_IN.prop = str(IMAGE_TYPES.index(type_in) + 1)  # type: ignore
-                type_in = PREV_TYPE_IN.prop
-            except ValueError:
-                print("Unknown value, try again.")
-                continue
-        elif not allow_empty and type_in and type_in.isdigit():
-            PREV_TYPE_IN.prop = type_in
-
-        if type_in == "" and allow_empty:
-            break
-        elif type_in == "" and not allow_empty:
-            print("Type index cannot be empty when adding.")
-        elif not type_in.isnumeric():
-            print("Type index is not a number.")
-        elif int(type_in) not in list(range(1, len(IMAGE_TYPES) + 1)):
-            print("Type index out of bounds. Try again.")
-
-        else:
+        res = check_menu_selection(
+            type_in, "Type selection", allow_empty, IMAGE_TYPES, PREV_TYPE_IN
+        )
+        if res:
             type_name = IMAGE_TYPES[int(type_in) - 1]
             break
     return type_name
@@ -153,6 +169,21 @@ def ask_with_previous(prompt: str, prev: str):
     return prop
 
 
+def ask_rating():
+    while True:
+        print("Rating:")
+        print(generate_menu_print(RATING))
+        tmp = ask_with_previous(
+            "Rating number",
+            RATING[int(PREV_RATING.prop) - 1] if PREV_RATING.prop else "",
+        )
+        res = check_menu_selection(tmp, "Rating selection", False, RATING, PREV_RATING)
+        if res:
+            rating = RATING[int(tmp)]
+            break
+    return rating
+
+
 def add_file(initial_dir: str):
     api = get_api()
 
@@ -164,12 +195,7 @@ def add_file(initial_dir: str):
     artist = ask_with_previous("Artist name", PREV_ARTIST.prop)
     PREV_ARTIST.prop = artist
 
-    while True:
-        rating = input("Rating (sfw | nsfw): ").lower()
-        if rating not in ["sfw", "nsfw"]:
-            print("Only 'sfw' or 'nsfw' value allowed.")
-        else:
-            break
+    rating = ask_rating()
 
     type_name = ask_type("Image type index")
     df = DISPLAY_FILE(
