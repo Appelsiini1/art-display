@@ -80,8 +80,15 @@ def get_api():
     return api
 
 
+def get_replace_path():
+    rp_path = getenv("PATH_TO_REPLACE")
+    if rp_path == None:
+        raise ValueError("No replace path defined.")
+    return rp_path
+
+
 def replace_win_path(path: str):
-    return path.replace("R:/", "")
+    return path.replace(get_replace_path(), "")
 
 
 def generate_menu_print(menu_list: list | tuple):
