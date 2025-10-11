@@ -96,7 +96,7 @@ export async function getRandomDisplayFile(
   rating: "all" | string = "all"
 ): Promise<displayFile> {
   return _execOperationDB(async (db: Database) => {
-    let query = "SELECT path FROM displayFiles";
+    let query = "SELECT path FROM displayFiles ";
 
     switch (rating) {
       case "sfw":
@@ -106,6 +106,10 @@ export async function getRandomDisplayFile(
         query += 'WHERE rating="nsfw" AND';
         break;
 
+      case "all":
+        query += 'WHERE (rating="sfw" OR rating="nsfw") AND';
+        break;
+
       default:
         query += "WHERE";
         break;
@@ -113,21 +117,37 @@ export async function getRandomDisplayFile(
     query +=
       " id > (ABS(RANDOM()) % (SELECT max(id) FROM displayFiles)) LIMIT 1";
 
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       let round = 1;
+      let row = undefined;
       while (1) {
-        db.get(query, (err: Error, row: displayFile) => {
-          if (err) {
-            console.error("Error in getDisplayFile():", err.message);
-            reject(err);
-          } else if (row != undefined) {
-            resolve(row);
-          }
+        row = await getFileFromDB(query, db);
+        if (!row) {
           round += 1;
           console.warn(
             `getRandomDisplayFile(): Row was undefined, starting round ${round}.`
           );
-        });
+        } else {
+          break;
+        }
+      }
+      // @ts-ignore
+      resolve(row);
+    });
+  });
+}
+
+async function getFileFromDB(
+  query: string,
+  db: Database
+): Promise<displayFile> {
+  return new Promise((resolve, reject) => {
+    db.get(query, (err: Error, row: displayFile) => {
+      if (err) {
+        console.error("Error in getFileFromDB():", err.message);
+        reject(err);
+      } else {
+        resolve(row);
       }
     });
   });
@@ -177,10 +197,10 @@ export async function getMaxDisplayFileID(): Promise<number> {
 
 export async function getMetadataValue(id: string) {
   return _execOperationDB(async (db: Database) => {
-    const query = `SELECT value FROM metadata WHERE id=${id}`;
+    const query = `SELECT value FROM metadata WHERE id=(?)`;
 
     return new Promise<metadataRow>((resolve, reject) => {
-      db.get(query, (err: Error, row: metadataRow) => {
+      db.get(query, [id], (err: Error, row: metadataRow) => {
         if (err) {
           console.error("Error in getMetadataValue():", err.message);
           reject(err);
@@ -198,7 +218,6 @@ export async function addDisplayFileToDB(file: displayFile): Promise<null> {
     return new Promise((resolve, reject) => {
       db.serialize(() => {
         const parameters = _objectToArrayDF(file);
-        console.log(parameters);
         db.run(query, parameters, (err) => {
           if (err) {
             console.error("Error inserting new row to displayFiles table!");
@@ -237,11 +256,11 @@ export async function updateMetadataValueDB(
   value: string
 ): Promise<null> {
   return _execOperationDB(async (db: Database) => {
-    const query = `UPDATE metadata SET value="${value}" WHERE id=${id}`;
+    const query = `UPDATE metadata SET value=(?) WHERE id=(?)`;
 
     return new Promise((resolve, reject) => {
       db.serialize(() => {
-        db.run(query, [id, value], (err) => {
+        db.run(query, [value, id], (err) => {
           if (err) {
             console.error(
               `Error updating row with id ${id} to metadata table!`
