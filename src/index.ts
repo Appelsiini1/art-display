@@ -13,12 +13,17 @@ import {
 } from "./modules/database";
 import { displayFileSchema, displayFileSchemaUpdate } from "./models/schemas";
 import { getFile } from "./modules/util";
+import { loadEnvFile } from "node:process";
+const cors = require("cors");
 
 const PORT = 9000;
 const app = express();
 
+loadEnvFile("./src/.env");
+
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.json());
+app.use(cors());
 /* app.use((req, res) => {
   res.status(404);
   res.send("<h1>Error 404: Resource not found.</h1>");
@@ -86,6 +91,7 @@ app.get("/img/random", async (req, res) => {
   try {
     const rating = await getMetadataValue("currentRating");
     const imgInfo = await getRandomDisplayFile(rating.value);
+    console.log(`Serving '${imgInfo.path}'`);
 
     getFile(res, imgInfo.path);
   } catch (err: any) {
@@ -142,7 +148,7 @@ app.post("/metadata", async (req, res) => {
     res.status(400).send("Parameters missing");
   } else {
     try {
-      const prev_value = getMetadataValue(valueID);
+      const prev_value = await getMetadataValue(valueID);
       if (prev_value == undefined) {
         await addMetadataValueDB(valueID, value);
         res
