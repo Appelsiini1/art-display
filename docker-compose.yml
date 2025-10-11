@@ -1,0 +1,8 @@
+services:
+  web:
+    build: .
+    ports:
+      - "54560:9000"
+    volumes:
+      - /home/carmelita/art-display/database:/usr/src/app/database
+      - /mnt/r:/mnt/r
