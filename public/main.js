@@ -1,9 +1,12 @@
 let currentVisibleID = "A";
 const fadeDelay = 2900;
-const slideInterval = 10;
+const slideInterval = 1800;
 const windowHeight = document.getElementById("img-container").clientHeight;
 const windowWidth = document.getElementById("img-container").clientWidth;
-const apiURL = "http://localhost:9000";
+const apiURL = "http://starlight-rise:54560";
+
+let blobA = null;
+let blobB = null;
 
 function getClassList(elementID) {
   return document.getElementById(elementID).classList;
@@ -18,12 +21,29 @@ function triggerFadeOut(elementID) {
   getClassList(elementID).add("fadeOutImage");
 }
 
+function revokeBlobURL(elementID) {
+  switch (elementID) {
+    case "A":
+      blobA ? URL.revokeObjectURL(blobA) : null;
+      break;
+    case "B":
+      blobB ? URL.revokeObjectURL(blobB) : null;
+  }
+}
+
 function getImage(elementID) {
   try {
     fetch(new Request(apiURL + "/img/random"))
       .then((response) => response.blob())
       .then((myBlob) => {
         const objectURL = URL.createObjectURL(myBlob);
+        switch (elementID) {
+          case "img-A":
+            blobA = objectURL;
+            break;
+          case "img-B":
+            blobB = objectURL;
+        }
         document.getElementById(elementID).src = objectURL;
       });
   } catch (err) {
@@ -128,9 +148,11 @@ function imageGetInit() {
   window.setInterval(() => {
     switch (currentVisibleID) {
       case "A":
+        revokeBlobURL("B");
         getImage("img-B");
         break;
       case "B":
+        revokeBlobURL("A");
         getImage("img-A");
         break;
     }
