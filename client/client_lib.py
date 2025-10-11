@@ -117,7 +117,7 @@ def metadata_value():
 
     try:
         response = requests.post(
-            api + "/metadata", {"id": name, "value": value}, timeout=5
+            api + "/metadata", params={"id": name, "value": value}, timeout=5
         )
         response.raise_for_status()
     except (ConnectionError, requests.HTTPError) as e:
