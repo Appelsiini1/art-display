@@ -1,18 +1,6 @@
 import sqlite3, { Database } from "sqlite3";
 import path from "node:path";
-
-interface displayFile {
-  id: number;
-  artist: string;
-  path: string;
-  type: string;
-  rating: "sfw" | "nsfw";
-}
-
-interface metadataRow {
-  id: string;
-  value: string;
-}
+import { displayFile, metadataRow } from "../models/types";
 
 function _objectToArrayDF(obj: displayFile): Array<number | string> {
   return [obj.artist, obj.path, obj.type, obj.rating];
@@ -96,7 +84,7 @@ export async function getRandomDisplayFile(
   rating: "all" | string = "all"
 ): Promise<displayFile> {
   return _execOperationDB(async (db: Database) => {
-    let query = "SELECT path FROM displayFiles ";
+    let query = "SELECT * FROM displayFiles ";
 
     switch (rating) {
       case "sfw":
@@ -157,10 +145,10 @@ export async function getDisplayFile(
   id: number
 ): Promise<displayFile | number> {
   return _execOperationDB(async (db: Database) => {
-    const query = `SELECT * FROM displayFiles WHERE id=${id}`;
+    const query = `SELECT * FROM displayFiles WHERE id=(?)`;
 
     return new Promise((resolve, reject) => {
-      db.get(query, (err: Error, row: displayFile) => {
+      db.get(query, [id], (err: Error, row: displayFile) => {
         if (err) {
           console.error("Error in getDisplayFile():", err.message);
           reject(err);

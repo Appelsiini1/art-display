@@ -2,12 +2,13 @@ import fs from "node:fs";
 import path from "node:path";
 import { Response } from "express";
 import { env } from "node:process";
+import { displayFile, displayFileDTO } from "../models/types";
 
 function getMIMEType(filepath: string): string {
   try {
     const extension = path.extname(filepath);
     let dataString = `image/`;
-    switch (extension.replace(".", "")) {
+    switch (extension.replace(".", "").toLowerCase()) {
       case "png":
         dataString += "png";
         break;
@@ -61,4 +62,8 @@ export async function getFile(res: Response, filepath: string) {
       reject(null);
     }
   });
+}
+
+export function transfromToDTO(imgInfo: displayFile): displayFileDTO {
+  return { ...imgInfo, file: path.basename(imgInfo.path) };
 }

@@ -12,7 +12,7 @@ import {
   updateMetadataValueDB,
 } from "./modules/database";
 import { displayFileSchema, displayFileSchemaUpdate } from "./models/schemas";
-import { getFile } from "./modules/util";
+import { getFile, transfromToDTO } from "./modules/util";
 import { loadEnvFile } from "node:process";
 const cors = require("cors");
 
@@ -70,7 +70,7 @@ app.get("/img", query("id").trim().notEmpty().isInt(), async (req, res) => {
           .status(404)
           .send(`File with '${req.query?.id}' not found in the database.`);
       } else {
-        res.status(200).json(imgInfo);
+        res.status(200).json(transfromToDTO(imgInfo));
       }
     } else {
       res.status(400).send("Invalid request.");
@@ -92,8 +92,7 @@ app.get("/img/random", async (req, res) => {
     const rating = await getMetadataValue("currentRating");
     const imgInfo = await getRandomDisplayFile(rating.value);
     console.log(`Serving '${imgInfo.path}'`);
-
-    getFile(res, imgInfo.path);
+    res.status(200).json(transfromToDTO(imgInfo));
   } catch (err: any) {
     res.status(500).send("Internal Server Error");
     console.error(err.message);
