@@ -1,10 +1,10 @@
 let currentVisibleID = "A";
 const fadeDelay = 2900;
-const slideInterval = 20;
+const slideInterval = 600;
 const windowHeight = document.getElementById("img-container").clientHeight;
 const windowWidth = document.getElementById("img-container").clientWidth;
-const apiURL = "http://localhost:9000";
-//const apiURL = "http://starlight-rise:54560";
+//const apiURL = "http://localhost:9000";
+const apiURL = "http://starlight-rise:54560";
 
 let blobA = null;
 let blobB = null;
