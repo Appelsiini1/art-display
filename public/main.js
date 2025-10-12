@@ -1,12 +1,21 @@
 let currentVisibleID = "A";
 const fadeDelay = 2900;
-const slideInterval = 900;
+const slideInterval = 20;
 const windowHeight = document.getElementById("img-container").clientHeight;
 const windowWidth = document.getElementById("img-container").clientWidth;
-const apiURL = "http://starlight-rise:54560";
+const apiURL = "http://localhost:9000";
+//const apiURL = "http://starlight-rise:54560";
 
 let blobA = null;
 let blobB = null;
+
+let imgInfoA = null;
+let imgInfoB = null;
+
+const artistEL = document.getElementById("artist");
+const fileEL = document.getElementById("file");
+const ratingEL = document.getElementById("rating");
+const typeEL = document.getElementById("type-field");
 
 function getClassList(elementID) {
   return document.getElementById(elementID).classList;
@@ -34,18 +43,33 @@ function revokeBlobURL(elementID) {
 function getImage(elementID) {
   try {
     fetch(new Request(apiURL + "/img/random"))
-      .then((response) => response.blob())
-      .then((myBlob) => {
-        const objectURL = URL.createObjectURL(myBlob);
+      .then(async (response) => {
+        const resJson = await response.json();
         switch (elementID) {
           case "img-A":
-            blobA = objectURL;
+            imgInfoA = resJson;
             break;
           case "img-B":
-            blobB = objectURL;
+            imgInfoB = resJson;
         }
-        document.getElementById(elementID).src = objectURL;
-      });
+        return resJson;
+      })
+      .then((resJson) => {
+        fetch(new Request(apiURL + "/img/file?id=" + resJson.id.toString()))
+          .then((response) => response.blob())
+          .then((myBlob) => {
+            const objectURL = URL.createObjectURL(myBlob);
+            switch (elementID) {
+              case "img-A":
+                blobA = objectURL;
+                break;
+              case "img-B":
+                blobB = objectURL;
+            }
+            document.getElementById(elementID).src = objectURL;
+          });
+      })
+      .catch((reason) => console.error(reason));
   } catch (err) {
     console.error(err.message);
   }
@@ -102,6 +126,15 @@ function setImgPosition(elementID) {
   }
 }
 
+function setFileDetails(elementID) {
+  const imgDetails = elementID == "img-A" ? imgInfoA : imgInfoB;
+
+  artistEL.innerText = `Artist: ${imgDetails.artist}`;
+  fileEL.innerText = `File: ${imgDetails.file}`;
+  ratingEL.innerText = `Rating: ${imgDetails.rating}`;
+  typeEL.innerText = `Type: ${imgDetails.type}`;
+}
+
 function slideHandler() {
   let fadeInID = "";
   let fadeOutID = "";
@@ -128,6 +161,7 @@ function slideHandler() {
     getClassList(fadeInID).remove("hidden");
     getClassList(fadeInID).remove("fadeInImage");
   }, fadeDelay);
+  setFileDetails(fadeInID);
 }
 
 function initPage() {

@@ -113,6 +113,9 @@
 body {
   background-color: black;
   margin: 0;
+  cursor: none;
+  -ms-overflow-style: none;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
 }
 
 img {
@@ -125,3 +128,22 @@ img {
 .hidden {
   opacity: 0;
 }
+
+.info-box {
+  background: rgba(0, 0, 0, 0.3);
+  font-size: 1em;
+  max-height: 15vh;
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  color: rgba(255, 255, 255, 0.7);
+  padding: 0.5em;
+}
+
+html {
+  scrollbar-width: none;
+} /* Firefox */
+body::-webkit-scrollbar,
+body::-webkit-scrollbar-button {
+  display: none;
+} /* Chrome */
