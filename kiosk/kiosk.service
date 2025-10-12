@@ -1,0 +1,12 @@
+[Unit]
+Description=Chromium kiosk
+PartOf=graphical-session.target
+
+[Service]
+ExecStart=/home/lilith/kiosk.sh
+Type=forking
+Restart=on-failure
+RestartSec=15s
+
+[Install]
+WantedBy=xsession.target
