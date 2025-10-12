@@ -1,6 +1,6 @@
 let currentVisibleID = "A";
 const fadeDelay = 2900;
-const slideInterval = 1800;
+const slideInterval = 900;
 const windowHeight = document.getElementById("img-container").clientHeight;
 const windowWidth = document.getElementById("img-container").clientWidth;
 const apiURL = "http://starlight-rise:54560";
