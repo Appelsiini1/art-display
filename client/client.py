@@ -1,4 +1,5 @@
 from sys import exit
+from client_utils import get_api
 from client_lib import (
     add_file,
     update_file,
@@ -32,7 +33,8 @@ def main():
     selection = -1
     init_dir = ""
 
-    print("Display file database client\n")
+    print("Display file database client")
+    print(f"Using server: {get_api()}\n")
     while selection != 0:
         selection = menu()
 

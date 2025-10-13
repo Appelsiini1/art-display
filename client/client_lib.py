@@ -139,7 +139,6 @@ def get_metadata_value():
     except (ConnectionError, requests.HTTPError) as e:
         print("Connection error occured: ", e)
         return
-    print("Value added/updated.")
 
 
 def get_display_value():
