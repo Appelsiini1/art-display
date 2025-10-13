@@ -1,6 +1,6 @@
 let currentVisibleID = "A";
 const fadeDelay = 2900;
-const slideInterval = 600;
+const slideInterval = 900;
 const windowHeight = document.getElementById("img-container").clientHeight;
 const windowWidth = document.getElementById("img-container").clientWidth;
 //const apiURL = "http://localhost:9000";
@@ -40,8 +40,8 @@ function revokeBlobURL(elementID) {
   }
 }
 
-function getImage(elementID) {
-  try {
+async function getImage(elementID) {
+  return new Promise((resolve, reject) => {
     fetch(new Request(apiURL + "/img/random"))
       .then(async (response) => {
         const resJson = await response.json();
@@ -67,12 +67,14 @@ function getImage(elementID) {
                 blobB = objectURL;
             }
             document.getElementById(elementID).src = objectURL;
+            resolve(null);
           });
       })
-      .catch((reason) => console.error(reason));
-  } catch (err) {
-    console.error(err.message);
-  }
+      .catch((reason) => {
+        console.error(reason);
+        reject(reason);
+      });
+  });
 }
 
 function setImgDimensions(elementID) {
@@ -164,9 +166,12 @@ function slideHandler() {
   setFileDetails(fadeInID);
 }
 
-function initPage() {
+async function initPage() {
   console.log(window.screen.availHeight);
   console.log(window.screen.availWidth);
+  await getImage("img-A");
+  await getImage("img-B");
+  setFileDetails("img-A");
   setImgDimensions("img-A");
   setImgPosition("img-A");
   setImgDimensions("img-B");
