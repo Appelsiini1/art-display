@@ -9,3 +9,6 @@ Enable service:
 
 Start service:
 `systemctl --user start kiosk`
+
+Restarting the service can be used if the browser crashes (may happen on low power devices like Raspberry Pi)
+`systemctl --user restart kiosk`
