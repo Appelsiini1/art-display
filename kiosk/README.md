@@ -5,7 +5,7 @@ Place kiosk.sh to home folder
 Place kiosk.service & xsession.target to `~/.config/systemd/user/`
 
 Enable service:
-`systemd --user enable kiosk`
+`systemctl --user enable kiosk`
 
 Start service:
-`systemd --user start kiosk`
+`systemctl --user start kiosk`
