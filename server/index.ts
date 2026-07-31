@@ -10,11 +10,11 @@ import {
   initDatabase,
   updateDisplayFilesToDB,
   updateMetadataValueDB,
-} from "./modules/database";
-import { displayFileSchema, displayFileSchemaUpdate } from "./models/schemas";
-import { getFile, transfromToDTO } from "./modules/util";
+} from "./src/modules/database";
+import { displayFileSchema, displayFileSchemaUpdate } from "./src/models/schemas";
+import { getFile, transfromToDTO } from "./src/modules/util";
 import { loadEnvFile } from "node:process";
-const cors = require("cors");
+import cors from "cors";
 
 const PORT = 9000;
 const app = express();
