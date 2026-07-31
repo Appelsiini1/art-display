@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { Response } from "express";
 import { env } from "node:process";
-import { displayFile, displayFileDTO } from "../models/types";
+import { DisplayFile, DisplayFileDTO } from "../models/types";
 
 function getMIMEType(filepath: string): string {
   try {
@@ -64,6 +64,6 @@ export async function getFile(res: Response, filepath: string) {
   });
 }
 
-export function transfromToDTO(imgInfo: displayFile): displayFileDTO {
+export function transfromToDTO(imgInfo: DisplayFile): DisplayFileDTO {
   return { ...imgInfo, file: path.basename(imgInfo.path) };
 }

@@ -1,23 +1,20 @@
-import express, { Request, Response } from "express";
+import express from "express";
 import path from "node:path";
-import { query, validationResult, checkSchema } from "express-validator";
+import { query, validationResult } from "express-validator";
 import {
-  addDisplayFileToDB,
-  addMetadataValueDB,
-  getDisplayFile,
+  getDisplayFileById,
   getMetadataValue,
   getRandomDisplayFile,
-  initDatabase,
-  updateDisplayFilesToDB,
-  updateMetadataValueDB,
-} from "./src/modules/database";
-import { displayFileSchema, displayFileSchemaUpdate } from "./src/models/schemas";
-import { getFile, transfromToDTO } from "./src/modules/util";
+  initDbTables,
+  insertRow,
+} from "./modules/database";
+import { getFile, transfromToDTO } from "./modules/util";
 import { loadEnvFile } from "node:process";
-import cors from "cors";
+const cors = require("cors");
 
 const PORT = 9000;
 const app = express();
+let DB_INIT = 0;
 
 loadEnvFile("./src/.env");
 
@@ -28,10 +25,11 @@ app.use(cors());
   res.status(404);
   res.send("<h1>Error 404: Resource not found.</h1>");
 }); */
-initDatabase().then(() => {
-  app.listen(PORT, () =>
-    console.log(`Server online at http://localhost:${PORT}`)
-  );
+initDbTables().then(() => {
+  app.listen(PORT, () => {
+    console.log(`Server online at http://localhost:${PORT}`);
+    DB_INIT = 1;
+  });
 });
 
 //URL/img?id=value
@@ -42,7 +40,9 @@ app.get(
     const result = validationResult(req);
     try {
       if (result.isEmpty()) {
-        const imgInfo = await getDisplayFile(req.query?.id);
+        const imgInfo = await getDisplayFileById(req.query?.id);
+        if (!imgInfo)
+          throw new Error(`Database call failed for file id ${req.query?.id}.`);
         if (typeof imgInfo == "number") {
           res
             .status(404)
@@ -57,14 +57,24 @@ app.get(
       res.status(500).send("Internal Server Error");
       console.error(err.message);
     }
-  }
+  },
 );
+app.get("/metadata/status", async (req, res) => {
+  if (DB_INIT === 1) {
+    res.status(200).send({ ready: true });
+  } else {
+    res.status(200).send({ ready: false });
+  }
+});
 
 app.get("/img", query("id").trim().notEmpty().isInt(), async (req, res) => {
   const result = validationResult(req);
   try {
     if (result.isEmpty()) {
-      const imgInfo = await getDisplayFile(req.query?.id);
+      const imgInfo = await getDisplayFileById(req.query?.id);
+      if (!imgInfo)
+        throw new Error(`Database call failed for file id ${req.query?.id}.`);
+
       if (typeof imgInfo == "number") {
         res
           .status(404)
@@ -90,7 +100,7 @@ app.get("/img", query("id").trim().notEmpty().isInt(), async (req, res) => {
 app.get("/img/random", async (req, res) => {
   try {
     const rating = await getMetadataValue("currentRating");
-    const imgInfo = await getRandomDisplayFile(rating.value);
+    const imgInfo = await getRandomDisplayFile(rating ? rating.value : "sfw");
     console.log(`Serving '${imgInfo.path}'`);
     res.status(200).json(transfromToDTO(imgInfo));
   } catch (err: any) {
@@ -99,45 +109,45 @@ app.get("/img/random", async (req, res) => {
   }
 });
 
-app.post(
-  "/database/update",
-  checkSchema(displayFileSchemaUpdate, ["body"]),
-  async (req: Request, res: Response) => {
-    try {
-      const result = validationResult(req);
-      if (result.isEmpty()) {
-        const rq_body = req.body;
-        await updateDisplayFilesToDB(rq_body);
-        res.status(200).send("Operation successful.");
-      } else {
-        res.status(400).send("Invalid request.");
-      }
-    } catch (err: any) {
-      res.status(500).send("Internal Server Error");
-      console.error(err.message);
-    }
-  }
-);
+// app.post(
+//   "/database/update",
+//   checkSchema(displayFileSchemaUpdate, ["body"]),
+//   async (req: Request, res: Response) => {
+//     try {
+//       const result = validationResult(req);
+//       if (result.isEmpty()) {
+//         const rq_body = req.body;
+//         await updateDisplayFilesToDB(rq_body);
+//         res.status(200).send("Operation successful.");
+//       } else {
+//         res.status(400).send("Invalid request.");
+//       }
+//     } catch (err: any) {
+//       res.status(500).send("Internal Server Error");
+//       console.error(err.message);
+//     }
+//   },
+// );
 
-app.post(
-  "/database/add",
-  checkSchema(displayFileSchema, ["body"]),
-  async (req: Request, res: Response) => {
-    try {
-      const result = validationResult(req);
-      if (result.isEmpty()) {
-        const rq_body = req.body;
-        await addDisplayFileToDB(rq_body);
-        res.status(200).send("Operation successful.");
-      } else {
-        res.status(400).send("Invalid request.");
-      }
-    } catch (err: any) {
-      res.status(500).send("Internal Server Error");
-      console.error(err.message);
-    }
-  }
-);
+// app.post(
+//   "/database/add",
+//   checkSchema(displayFileSchema, ["body"]),
+//   async (req: Request, res: Response) => {
+//     try {
+//       const result = validationResult(req);
+//       if (result.isEmpty()) {
+//         const rq_body = req.body;
+//         await addDisplayFileToDB(rq_body);
+//         res.status(200).send("Operation successful.");
+//       } else {
+//         res.status(400).send("Invalid request.");
+//       }
+//     } catch (err: any) {
+//       res.status(500).send("Internal Server Error");
+//       console.error(err.message);
+//     }
+//   },
+// );
 
 app.post("/metadata", async (req, res) => {
   const valueID = req.query.id?.toString();
@@ -149,12 +159,12 @@ app.post("/metadata", async (req, res) => {
     try {
       const prev_value = await getMetadataValue(valueID);
       if (prev_value == undefined) {
-        await addMetadataValueDB(valueID, value);
+        await insertRow("metadata", { name: valueID, value });
         res
           .status(200)
           .send(`Added metadata value with id ${valueID} to database.`);
       } else {
-        await updateMetadataValueDB(valueID, value);
+        await insertRow("metadata", { name: valueID, value });
         res
           .status(200)
           .send(`Updated metadata value with id ${valueID} in the database.`);

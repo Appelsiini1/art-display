@@ -1,16 +1,22 @@
-export interface displayFile {
-  id: number;
-  artist: string;
+export interface DisplayFile {
+  id: string;
+  artist: string | null;
+  nsfw: boolean;
   path: string;
-  type: string;
-  rating: "sfw" | "nsfw";
+  created_at: Date;
+  updated_at: Date;
 }
 
-export interface metadataRow {
-  id: string;
+export interface MetadataRow {
+  name: string;
   value: string;
 }
 
-export interface displayFileDTO extends displayFile {
+export type QueryConfig = {
+  text: string;
+  values: any[];
+};
+
+export interface DisplayFileDTO extends DisplayFile {
   file: string;
 }
