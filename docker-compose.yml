@@ -1,6 +1,6 @@
 services:
   api:
-    build: ./src # directory containing your Dockerfile
+    build: ./server # directory containing your Dockerfile
     ports:
       - 54560:9000" # only the API is exposed to the host
     environment:
@@ -32,6 +32,18 @@ services:
       interval: 5s
       timeout: 3s
       retries: 5
+  scanner:
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      NODE_ENV: production
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - backend
+    restart: unless-stopped
+    volumes:
+      - /mnt/r:/mnt/r:ro
 
 networks:
   backend:

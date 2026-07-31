@@ -1,0 +1,21 @@
+{
+  "name": "art-display-scanner",
+  "version": "1.0.0",
+  "description": "Art display file scanner",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "start": "npm run build && node dist/index.js"
+  },
+  "author": "Rami Saarivuori",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/pg": "^8.20.0",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^7.0.2"
+  },
+  "dependencies": {
+    "pg": "^8.22.0"
+  }
+}
