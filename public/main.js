@@ -15,7 +15,7 @@ let imgInfoB = null;
 const artistEL = document.getElementById("artist");
 const fileEL = document.getElementById("file");
 const ratingEL = document.getElementById("rating");
-const typeEL = document.getElementById("type-field");
+//const typeEL = document.getElementById("type-field");
 
 function getClassList(elementID) {
   return document.getElementById(elementID).classList;
@@ -113,7 +113,7 @@ function setImgPosition(elementID) {
     element.style.setProperty(
       "top",
       Math.floor(diffHeight / 2).toString() + "px",
-      "important"
+      "important",
     );
   }
 
@@ -123,7 +123,7 @@ function setImgPosition(elementID) {
     element.style.setProperty(
       "left",
       Math.floor(diffWidth / 2).toString() + "px",
-      "important"
+      "important",
     );
   }
 }
@@ -133,8 +133,8 @@ function setFileDetails(elementID) {
 
   artistEL.innerText = `Artist: ${imgDetails.artist}`;
   fileEL.innerText = `File: ${imgDetails.file}`;
-  ratingEL.innerText = `Rating: ${imgDetails.rating}`;
-  typeEL.innerText = `Type: ${imgDetails.type}`;
+  ratingEL.innerText = `Rating: ${imgDetails.nsfw ? "NSFW" : "SFW"}`;
+  //typeEL.innerText = `Type: ${imgDetails.type}`;
 }
 
 function slideHandler() {
