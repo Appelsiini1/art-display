@@ -48,27 +48,35 @@ export async function execQuery(
 
 export async function initDbTables() {
   await execQuery(
-    "CREATE TABLE IF NOT EXISTS displayFiles (\
-    id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),\
+    "CREATE TABLE IF NOT EXISTS display_files (\
+    path        TEXT PRIMARY KEY,\
     artist      TEXT,\
     nsfw        BOOLEAN,\
-    path        TEXT,\
-    created_at  TIMESTAMPTZ DEFAULT now(),\
-    updated_at  TIMESTAMPTZ DEFAULT now()\
+    id          UUID\
 );",
   );
   await execQuery(
     "CREATE TABLE IF NOT EXISTS metadata (\
     id        UUID PRIMARY KEY DEFAULT gen_random_uuid(),\
     name      TEXT,\
-    value     TEXT,\
+    value     TEXT\
     );",
+  );
+
+  await execQuery(
+    "CREATE TABLE IF NOT EXISTS xmp_fingerprints (\
+    path      TEXT PRIMARY KEY,\
+    size      BIGINT NOT NULL,\
+    mtime_ms  DOUBLE PRECISION NOT NULL,\
+    hash      TEXT NOT NULL,\
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now()\
+);",
   );
 }
 export async function getRandomDisplayFile(
   rating: "all" | string = "all",
 ): Promise<DisplayFile> {
-  let query = "SELECT * FROM displayFiles ";
+  let query = "SELECT * FROM display_files ";
 
   switch (rating) {
     case "sfw":
@@ -109,7 +117,7 @@ export async function getDisplayFileById(
   id: string,
 ): Promise<DisplayFile | undefined> {
   const query = {
-    text: "SELECT * FROM displayFiles WHERE id=$1",
+    text: "SELECT * FROM display_files WHERE id=$1",
     values: [id],
   };
   const result = await execQuery(query);
