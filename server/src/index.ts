@@ -59,7 +59,7 @@ app.get(
     }
   },
 );
-app.get("/metadata/status", async (req, res) => {
+app.get("/status", async (req, res) => {
   if (DB_INIT === 1) {
     res.status(200).send({ ready: true });
   } else {
