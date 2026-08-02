@@ -1,5 +1,5 @@
 import { fingerprintWriter } from "./modules/db";
-import { getDBStatus } from "./modules/util";
+import { getDBStatus, waitForDb } from "./modules/util";
 import {
   processOne,
   processFilesConcurrently,
@@ -23,6 +23,10 @@ async function main() {
     filePatterns: [/\.psd(\.|$)/i],
     dirPatterns: [],
   };
+
+  console.log("Waiting for DB to be ready...");
+  await waitForDb(500, 30_000); // poll every 500ms, give up after 30s
+  console.log("DB ready, starting scan loop.");
 
   let running = false;
   setInterval(async () => {

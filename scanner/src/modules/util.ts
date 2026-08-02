@@ -20,6 +20,23 @@ function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+export async function waitForDb(pollMs = 500, timeoutMs?: number) {
+  const start = Date.now();
+  while (true) {
+    try {
+      if (await getDBStatus()) return;
+    } catch {
+      // ignore transient errors while DB is coming up
+    }
+    if (timeoutMs && Date.now() - start > timeoutMs) {
+      throw new Error(
+        `Timed out after ${timeoutMs}ms waiting for DB to be ready`,
+      );
+    }
+    await sleep(pollMs);
+  }
+}
+
 export async function computeFingerprint(
   filePath: string,
   stat: fs.Stats,
