@@ -24,16 +24,23 @@ async function main() {
     dirPatterns: [],
   };
 
+  let running = false;
   setInterval(async () => {
-    if (await getDBStatus()) {
-      await processFilesConcurrently(
-        walkXmpFiles(dirArg, dirArg, ignore),
-        options,
-        processOne,
-      );
-      await fingerprintWriter.close(); // flush any remainder sitting in the buffer
+    if (running) return;
+    running = true;
+    try {
+      if (await getDBStatus()) {
+        await processFilesConcurrently(
+          walkXmpFiles(dirArg, dirArg, ignore),
+          options,
+          processOne,
+        );
+        await fingerprintWriter.close(); // flush any remainder sitting in the buffer
+      }
+    } finally {
+      running = false;
     }
-  }, 86400);
+  }, 86400 * 1000);
 }
 
 main().catch((err) => {
