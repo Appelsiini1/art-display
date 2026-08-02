@@ -20,7 +20,7 @@ async function main() {
   }
 
   let ignore = {
-    filePatterns: [],
+    filePatterns: [/\.psd(\.|$)/i],
     dirPatterns: [],
   };
 
