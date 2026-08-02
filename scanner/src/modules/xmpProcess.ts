@@ -7,6 +7,7 @@ import {
   extractArtist,
   extractAllTags,
   containsIgnoreTags,
+  stripXmpExtension,
 } from "./util";
 import path from "path";
 import fs from "fs";
@@ -50,7 +51,7 @@ export async function processOne(filePath: string, options: ScanOptions) {
   const matchedTags = findMatchingTags(tags, ["NSFW", "SFW"]);
   if (matchedTags.length > 0) {
     const df: DisplayFile = {
-      path: filePath,
+      path: stripXmpExtension(filePath),
       artist: extractArtist(filePath),
       nsfw: matchedTags.find((tag) => tag === "nsfw") ? true : false,
     };

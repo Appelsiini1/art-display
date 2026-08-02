@@ -127,3 +127,7 @@ export function getDBStatus(): Promise<Boolean> {
       });
   });
 }
+
+export function stripXmpExtension(filePath: string): string {
+  return filePath.replace(/\.xmp$/i, "");
+}
