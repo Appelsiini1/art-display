@@ -129,7 +129,7 @@ export async function getMetadataValue(
   id: string,
 ): Promise<MetadataRow | undefined> {
   const query = {
-    text: "SELECT * FROM metadata WHERE id=$1",
+    text: "SELECT name, value FROM metadata WHERE name=$1",
     values: [id],
   };
   const result = await execQuery(query);
