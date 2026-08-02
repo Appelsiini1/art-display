@@ -29,7 +29,7 @@ async function main() {
   console.log("DB ready, starting scan loop.");
 
   let running = false;
-  setInterval(async () => {
+  const runScan = async () => {
     if (running) return;
     running = true;
     try {
@@ -44,7 +44,10 @@ async function main() {
     } finally {
       running = false;
     }
-  }, 86400 * 1000);
+  };
+
+  await runScan();
+  setInterval(runScan, 86400 * 1000);
 }
 
 main().catch((err) => {
