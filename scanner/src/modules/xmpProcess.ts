@@ -18,6 +18,8 @@ import {
 } from "./db";
 
 export async function processOne(filePath: string, options: ScanOptions) {
+  console.log("Processing file:", filePath);
+
   // --- change-detection: skip if unchanged since last run ---
   let stat: fs.Stats = await getFileMetadata(filePath, options);
 
@@ -55,8 +57,14 @@ export async function processOne(filePath: string, options: ScanOptions) {
       artist: extractArtist(filePath),
       nsfw: matchedTags.find((tag) => tag === "NSFW") ? true : false,
     };
+    console.log(
+      "File '",
+      filePath,
+      "' is new and has matched tags, adding to database.",
+    );
     displayFileBatchWriter.add(df);
   }
+  console.log("File '", filePath, "' is new, adding fingerprint to database.");
   await fingerprintWriter.add({ path: filePath, ...fingerprint });
   return;
 }
