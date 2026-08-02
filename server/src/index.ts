@@ -9,14 +9,11 @@ import {
   insertRow,
 } from "./modules/database";
 import { getFile, transfromToDTO } from "./modules/util";
-import { loadEnvFile } from "node:process";
 const cors = require("cors");
 
 const PORT = 9000;
 const app = express();
 let DB_INIT = 0;
-
-loadEnvFile("./src/.env");
 
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.json());

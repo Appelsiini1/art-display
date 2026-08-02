@@ -1,7 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
 import { Response } from "express";
-import { env } from "node:process";
 import { DisplayFile, DisplayFileDTO } from "../models/types";
 
 function getMIMEType(filepath: string): string {
@@ -44,12 +43,9 @@ export function getRandomIntInclusive(min: number, max: number) {
 export async function getFile(res: Response, filepath: string) {
   return new Promise((resolve, reject) => {
     try {
-      const prefix = env.PATH_PREFIX;
-      if (!prefix) throw new Error("No path prefix found in env!");
-      const fullPath = path.join(prefix, filepath);
-      const { size } = fs.statSync(fullPath);
-      const rs = fs.createReadStream(fullPath);
-      res.setHeader("Content-Type", getMIMEType(fullPath));
+      const { size } = fs.statSync(filepath);
+      const rs = fs.createReadStream(filepath);
+      res.setHeader("Content-Type", getMIMEType(filepath));
       res.setHeader("Content-Length", size);
       rs.pipe(res);
 
