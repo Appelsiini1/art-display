@@ -53,7 +53,7 @@ export async function processOne(filePath: string, options: ScanOptions) {
     const df: DisplayFile = {
       path: stripXmpExtension(filePath),
       artist: extractArtist(filePath),
-      nsfw: matchedTags.find((tag) => tag === "nsfw") ? true : false,
+      nsfw: matchedTags.find((tag) => tag === "NSFW") ? true : false,
     };
     displayFileBatchWriter.add(df);
   }
