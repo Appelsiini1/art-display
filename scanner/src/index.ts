@@ -13,19 +13,16 @@ async function main() {
     retryMs: Number(process.env.RETRY_MS) || 250,
   };
   const dirArg = process.env.SCANDIR;
-  const cachePath = process.env.CACHE_PATH;
-
-  if (!cachePath) {
-    process.stderr.write("No fingerprint cache set in env!");
-    process.exit(-1);
-  }
 
   if (!dirArg) {
     process.stderr.write("No scan directory set in env!");
     process.exit(-1);
   }
 
-  let ignore = { filePatterns: [], dirPatterns: [] };
+  let ignore = {
+    filePatterns: [],
+    dirPatterns: [],
+  };
 
   setInterval(async () => {
     if (await getDBStatus()) {
