@@ -1,10 +1,12 @@
-import { DisplayFile, FileFingerprint, ScanOptions } from "../models/types";
+import { DisplayFile, ScanOptions } from "../models/types";
 import {
   readFileWithRetry,
   findMatchingTags,
   computeFingerprint,
   getFileMetadata,
   extractArtist,
+  extractAllTags,
+  containsIgnoreTags,
 } from "./util";
 import path from "path";
 import fs from "fs";
@@ -41,7 +43,11 @@ export async function processOne(filePath: string, options: ScanOptions) {
     return;
   }
 
-  const matchedTags = findMatchingTags(content, ["NSFW", "SFW"]);
+  const tags = extractAllTags(content);
+
+  if (containsIgnoreTags(tags)) return;
+
+  const matchedTags = findMatchingTags(tags, ["NSFW", "SFW"]);
   if (matchedTags.length > 0) {
     const df: DisplayFile = {
       path: filePath,
@@ -88,7 +94,10 @@ function matchesAny(patterns: Array<RegExp>, relPath: string) {
 export async function* walkXmpFiles(
   dir: string,
   scanRoot: string,
-  ignore: { dirPatterns: Array<RegExp>; filePatterns: Array<RegExp> },
+  ignore: {
+    dirPatterns: Array<RegExp>;
+    filePatterns: Array<RegExp>;
+  },
 ): AsyncGenerator<string, void, unknown> {
   let entries;
   try {

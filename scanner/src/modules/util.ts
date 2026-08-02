@@ -3,6 +3,8 @@ import crypto from "node:crypto";
 import { ScanOptions, FileFingerprint } from "../models/types";
 
 const RDF_LI_RE = /<rdf:li[^>]*>\s*([^<]+?)\s*<\/rdf:li>/g;
+export let IGNORE_SET: Set<string> =
+  new Set(process.env.IGNORE_TAGS?.split(",")) || null;
 
 const RETRYABLE_ERROR_CODES = new Set([
   "EBUSY",
@@ -62,7 +64,7 @@ export async function getFileMetadata(filePath: string, options: ScanOptions) {
   throw lastErr;
 }
 
-function extractAllTags(content: string) {
+export function extractAllTags(content: string) {
   const out = [];
   let m;
   RDF_LI_RE.lastIndex = 0;
@@ -72,19 +74,20 @@ function extractAllTags(content: string) {
   return out;
 }
 
-export function findMatchingTags(
-  content: string,
-  requestedTags: Array<string>,
-) {
+export function findMatchingTags(tags: string[], requestedTags: Array<string>) {
   const requestedSet = new Set(requestedTags);
   const matched = new Set();
-  for (const value of extractAllTags(content)) {
+  for (const value of tags) {
     if (requestedSet.has(value)) {
       matched.add(value);
     }
   }
-  // Preserve the order tags were requested in.
   return requestedTags.filter((t) => matched.has(t));
+}
+
+export function containsIgnoreTags(tagList: string[]): Boolean {
+  if (IGNORE_SET === null) return false;
+  return tagList.some((item) => IGNORE_SET.has(item));
 }
 
 const ARTIST_RE = /Artist Archive[\/\\]+([^\/\\]+)/;
