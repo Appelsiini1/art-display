@@ -105,7 +105,7 @@ export function getDBStatus(): Promise<Boolean> {
         resolve(resJson.ready ? true : false);
       })
       .catch((reason) => {
-        process.stderr.write(reason);
+        console.error(reason);
         reject(reason);
       });
   });
