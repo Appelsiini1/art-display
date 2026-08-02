@@ -1,6 +1,6 @@
 # Build
 FROM node:24-alpine AS builder
-WORKDIR /app
+WORKDIR ./server
 COPY package*.json ./
 RUN npm ci
 COPY . .
@@ -8,9 +8,9 @@ RUN npm run build
 
 # Production
 FROM node:24-alpine
-WORKDIR /app
+WORKDIR ./server
 COPY package*.json ./
 RUN npm ci --omit=dev
-COPY --from=builder /app/dist ./dist
+COPY --from=builder ./server/dist ./dist
 EXPOSE 9000
-CMD ["node", "dist/main.js"]
+CMD ["node", "dist/index.js"]
