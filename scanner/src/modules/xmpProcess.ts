@@ -21,13 +21,23 @@ import {
 
 export async function processOne(filePath: string, options: ScanOptions) {
   logMessage(`Processing file: ${filePath}`, "debug");
-  if (!isAccetableFileExtension(filePath)) return;
+  if (!isAccetableFileExtension(filePath)) {
+    logMessage(
+      `Skipping file '${path.basename(filePath)}' based on extension.`,
+      "debug",
+    );
+    return;
+  }
 
   // --- change-detection: skip if unchanged since last run ---
   let stat: fs.Stats = await getFileMetadata(filePath, options);
 
   const prev = await getCachedFingerprint(filePath);
   if (prev && prev.size === stat.size && prev.mtimeMs === stat.mtimeMs) {
+    logMessage(
+      `Skipping file '${path.basename(filePath)}' based on unchanged metadata.`,
+      "debug",
+    );
     return; // unchanged, skip
   }
 
@@ -65,6 +75,11 @@ export async function processOne(filePath: string, options: ScanOptions) {
       "debug",
     );
     displayFileBatchWriter.add(df);
+  } else {
+    logMessage(
+      `Skipping file '${path.basename(filePath)}' based on no matching tags found.`,
+      "debug",
+    );
   }
   logMessage(
     `File '${filePath}' is new, adding fingerprint to database.`,
