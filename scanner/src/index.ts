@@ -43,6 +43,7 @@ async function main() {
       }
     } finally {
       running = false;
+      logMessage("Scan finished.", "info");
     }
   };
 

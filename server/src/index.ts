@@ -94,7 +94,7 @@ app.get("/img/random", async (req, res) => {
   try {
     const rating = await getMetadataValue("currentRating");
     const imgInfo = await getRandomDisplayFile(rating ? rating.value : "sfw");
-    console.log(`Serving '${imgInfo.path}'`);
+    logMessage(`Serving '${imgInfo.path}'`, "info");
     res.status(200).json(transfromToDTO(imgInfo));
   } catch (err: any) {
     res.status(500).send("Internal Server Error");
