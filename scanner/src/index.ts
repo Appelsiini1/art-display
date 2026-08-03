@@ -1,5 +1,5 @@
 import { fingerprintWriter } from "./modules/db";
-import { getDBStatus, waitForDb } from "./modules/util";
+import { getDBStatus, logMessage, waitForDb } from "./modules/util";
 import {
   processOne,
   processFilesConcurrently,
@@ -15,7 +15,7 @@ async function main() {
   const dirArg = process.env.SCANDIR;
 
   if (!dirArg) {
-    process.stderr.write("No scan directory set in env!");
+    logMessage("No scan directory set in env!", "error");
     process.exit(-1);
   }
 
@@ -24,9 +24,9 @@ async function main() {
     dirPatterns: [],
   };
 
-  console.log("Waiting for DB to be ready...");
+  logMessage("Waiting for DB to be ready...", "info");
   await waitForDb(500, 30_000); // poll every 500ms, give up after 30s
-  console.log("DB ready, starting scan loop.");
+  logMessage("DB ready, starting scan loop.", "info");
 
   let running = false;
   const runScan = async () => {
@@ -54,8 +54,9 @@ main().catch((err) => {
   if (err && err.code === "EPIPE") {
     process.exit(0);
   }
-  process.stderr.write(
+  logMessage(
     `\nUnexpected error: ${err && err.stack ? err.stack : err}\n`,
+    "error",
   );
   process.exit(1);
 });
