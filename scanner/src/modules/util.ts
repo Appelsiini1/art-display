@@ -16,7 +16,7 @@ const RETRYABLE_ERROR_CODES = new Set([
   "EHOSTUNREACH",
 ]);
 
-const ACCETABLE_FILE_EXTENSIONS = ["png", "jpg", "jpeg", "gif", "svg"];
+const ACCETABLE_FILE_EXTENSIONS = [".png", ".jpg", ".jpeg", ".gif", ".svg"];
 const LOG_LEVEL = process.env.LOG_LEVEL || "info";
 
 function sleep(ms: number) {
