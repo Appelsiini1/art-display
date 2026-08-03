@@ -17,6 +17,7 @@ const RETRYABLE_ERROR_CODES = new Set([
 ]);
 
 const ACCETABLE_FILE_EXTENSIONS = ["png", "jpg", "jpeg", "gif", "svg"];
+const LOG_LEVEL = process.env.LOG_LEVEL || "info";
 
 function sleep(ms: number) {
   if (ms <= 0) return Promise.resolve();
@@ -135,10 +136,20 @@ export function stripXmpExtension(filePath: string): string {
   return filePath.replace(/\.xmp$/i, "");
 }
 
-export function logMessage(msg: string, level: "info" | "error" | "warn") {
+export function logMessage(
+  msg: string,
+  level: "debug" | "info" | "error" | "warn",
+) {
+  if (
+    (level === "debug" && LOG_LEVEL === "info") ||
+    ((level === "info" || level === "debug") && LOG_LEVEL === "warn") ||
+    ((level === "debug" || level === "info" || level === "warn") &&
+      LOG_LEVEL === "error")
+  )
+    return;
   const time = new Date();
   const message = `${time.toLocaleString()} | ${level.toLocaleUpperCase()} | ${msg}`;
-  if (level === "info") {
+  if (level === "info" || level === "debug") {
     console.log(message);
   } else if (level === "error") {
     console.error(message);

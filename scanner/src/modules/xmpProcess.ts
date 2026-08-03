@@ -20,7 +20,7 @@ import {
 } from "./db";
 
 export async function processOne(filePath: string, options: ScanOptions) {
-  logMessage(`Processing file: ${filePath}`, "info");
+  logMessage(`Processing file: ${filePath}`, "debug");
   if (!isAccetableFileExtension(filePath)) return;
 
   // --- change-detection: skip if unchanged since last run ---
@@ -62,13 +62,13 @@ export async function processOne(filePath: string, options: ScanOptions) {
     };
     logMessage(
       `File '${filePath}' is new and has matched tags, adding to database.`,
-      "info",
+      "debug",
     );
     displayFileBatchWriter.add(df);
   }
   logMessage(
     `File '${filePath}' is new, adding fingerprint to database.`,
-    "info",
+    "debug",
   );
   await fingerprintWriter.add({ path: filePath, ...fingerprint });
   return;

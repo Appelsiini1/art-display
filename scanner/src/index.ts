@@ -34,6 +34,7 @@ async function main() {
     running = true;
     try {
       if (await getDBStatus()) {
+        logMessage("Starting scan...", "info");
         await processFilesConcurrently(
           walkXmpFiles(dirArg, dirArg, ignore),
           options,
