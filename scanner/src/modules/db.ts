@@ -3,7 +3,6 @@ import {
   DisplayFile,
   FileFingerprint,
   FingerprintUpdate,
-  QueryConfig,
 } from "../models/types";
 import { setInterval } from "node:timers";
 import { logMessage } from "./util";
@@ -49,99 +48,6 @@ export async function execQuery(
     // @ts-ignore
     return await dbContext.pool.query(query);
   }
-}
-
-export async function insertRow<T extends Record<string, any>>(
-  table: string,
-  data: T,
-  options?: { returning?: boolean },
-) {
-  // Remove undefined values
-  const entries = Object.entries(data).filter(([, v]) => v !== undefined);
-
-  const columns = entries.map(([key]) => key);
-
-  const values = entries.map(([, value]) => {
-    return value;
-  });
-
-  const placeholders = entries.map((_, i) => `$${i + 1}`);
-
-  const query: QueryConfig = {
-    text: `
-      INSERT INTO ${table} (${columns.join(", ")})
-      VALUES (${placeholders.join(", ")})
-      ${options?.returning ? "RETURNING *" : ""}
-    `,
-    values,
-  };
-
-  return execQuery(query, "transaction");
-}
-
-export async function updateRow<
-  T extends { id: any },
-  W extends Record<string, any>,
->(
-  table: string,
-  data: Partial<T>,
-  where: W,
-  options?: { returning?: boolean },
-) {
-  const dataEntries = Object.entries(data).filter(([, v]) => v !== undefined);
-
-  if (dataEntries.length === 0) {
-    throw new Error("No fields provided for update");
-  }
-
-  const whereEntries = Object.entries(where);
-
-  if (whereEntries.length === 0) {
-    throw new Error("WHERE clause is required to prevent full-table updates");
-  }
-
-  // Build SET clause
-  const setClauses = dataEntries.map(([key], i) => `${key} = $${i + 1}`);
-
-  const values: any[] = [];
-
-  // Add SET values
-  for (const [, value] of dataEntries) {
-    values.push(value);
-  }
-
-  // Build WHERE clause
-  const whereClauses = whereEntries.map(
-    ([key], i) => `${key} = $${dataEntries.length + i + 1}`,
-  );
-
-  // Add WHERE values
-  for (const [, value] of whereEntries) {
-    values.push(value);
-  }
-
-  // Build RETURNING clause (only updated fields + id)
-  let returningClause = "";
-  if (options?.returning) {
-    const updatedFields = dataEntries.map(([key]) => key);
-
-    // Ensure id is included (avoid duplicates)
-    const returningFields = Array.from(new Set(["id", ...updatedFields]));
-
-    returningClause = `RETURNING ${returningFields.join(", ")}`;
-  }
-
-  const query: QueryConfig = {
-    text: `
-      UPDATE ${table}
-      SET ${setClauses.join(", ")}
-      WHERE ${whereClauses.join(" AND ")}
-      ${returningClause}
-    `,
-    values,
-  };
-
-  return execQuery(query, "transaction");
 }
 
 export async function getCachedFingerprint(
