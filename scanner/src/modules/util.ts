@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import crypto from "node:crypto";
 import { ScanOptions, FileFingerprint } from "../models/types";
+import { basename, extname } from "node:path";
 
 const RDF_LI_RE = /<rdf:li[^>]*>\s*([^<]+?)\s*<\/rdf:li>/g;
 export let IGNORE_SET: Set<string> =
@@ -14,6 +15,8 @@ const RETRYABLE_ERROR_CODES = new Set([
   "ECONNRESET",
   "EHOSTUNREACH",
 ]);
+
+const ACCETABLE_FILE_EXTENSIONS = ["png", "jpg", "jpeg", "gif", "svg"];
 
 function sleep(ms: number) {
   if (ms <= 0) return Promise.resolve();
@@ -142,4 +145,10 @@ export function logMessage(msg: string, level: "info" | "error" | "warn") {
   } else {
     console.warn(message);
   }
+}
+
+export function isAccetableFileExtension(filePath: string) {
+  const ext = extname(basename(filePath, ".xmp")).toLocaleLowerCase();
+  if (ACCETABLE_FILE_EXTENSIONS.find((value) => ext === value)) return true;
+  return false;
 }

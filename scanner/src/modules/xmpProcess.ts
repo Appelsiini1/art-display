@@ -9,6 +9,7 @@ import {
   containsIgnoreTags,
   stripXmpExtension,
   logMessage,
+  isAccetableFileExtension,
 } from "./util";
 import path from "path";
 import fs from "fs";
@@ -20,6 +21,7 @@ import {
 
 export async function processOne(filePath: string, options: ScanOptions) {
   logMessage(`Processing file: ${filePath}`, "info");
+  if (!isAccetableFileExtension(filePath)) return;
 
   // --- change-detection: skip if unchanged since last run ---
   let stat: fs.Stats = await getFileMetadata(filePath, options);
