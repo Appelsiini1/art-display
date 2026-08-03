@@ -30,32 +30,28 @@ initDbTables().then(() => {
 });
 
 //URL/img?id=value
-app.get(
-  "/img/file",
-  query("id").trim().notEmpty().isInt(),
-  async (req, res) => {
-    const result = validationResult(req);
-    try {
-      if (result.isEmpty()) {
-        const imgInfo = await getDisplayFileById(req.query?.id);
-        if (!imgInfo)
-          throw new Error(`Database call failed for file id ${req.query?.id}.`);
-        if (typeof imgInfo == "number") {
-          res
-            .status(404)
-            .send(`File with '${req.query?.id}' not found in the database.`);
-        } else {
-          getFile(res, imgInfo.path);
-        }
+app.get("/img/file", query("id").trim().notEmpty(), async (req, res) => {
+  const result = validationResult(req);
+  try {
+    if (result.isEmpty()) {
+      const imgInfo = await getDisplayFileById(req.query?.id);
+      if (!imgInfo)
+        throw new Error(`Database call failed for file id ${req.query?.id}.`);
+      if (typeof imgInfo == "undefined") {
+        res
+          .status(404)
+          .send(`File with '${req.query?.id}' not found in the database.`);
       } else {
-        res.status(400).send("Invalid request.");
+        getFile(res, imgInfo.path);
       }
-    } catch (err: any) {
-      res.status(500).send("Internal Server Error");
-    logMessage(err.message, "error");
+    } else {
+      res.status(400).send("Invalid request.");
     }
-  },
-);
+  } catch (err: any) {
+    res.status(500).send("Internal Server Error");
+    logMessage(err.message, "error");
+  }
+});
 app.get("/status", async (req, res) => {
   if (DB_INIT === 1) {
     res.status(200).send({ ready: true });
@@ -64,7 +60,7 @@ app.get("/status", async (req, res) => {
   }
 });
 
-app.get("/img", query("id").trim().notEmpty().isInt(), async (req, res) => {
+app.get("/img", query("id").trim().notEmpty(), async (req, res) => {
   const result = validationResult(req);
   try {
     if (result.isEmpty()) {
@@ -72,7 +68,7 @@ app.get("/img", query("id").trim().notEmpty().isInt(), async (req, res) => {
       if (!imgInfo)
         throw new Error(`Database call failed for file id ${req.query?.id}.`);
 
-      if (typeof imgInfo == "number") {
+      if (typeof imgInfo == "undefined") {
         res
           .status(404)
           .send(`File with '${req.query?.id}' not found in the database.`);
