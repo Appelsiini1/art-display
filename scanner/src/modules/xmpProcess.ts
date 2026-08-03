@@ -8,6 +8,7 @@ import {
   extractAllTags,
   containsIgnoreTags,
   stripXmpExtension,
+  logMessage,
 } from "./util";
 import path from "path";
 import fs from "fs";
@@ -18,7 +19,7 @@ import {
 } from "./db";
 
 export async function processOne(filePath: string, options: ScanOptions) {
-  console.log("Processing file:", filePath);
+  logMessage(`Processing file: ${filePath}`, "info");
 
   // --- change-detection: skip if unchanged since last run ---
   let stat: fs.Stats = await getFileMetadata(filePath, options);
@@ -42,7 +43,7 @@ export async function processOne(filePath: string, options: ScanOptions) {
       options.retryMs,
     );
   } catch (err: any) {
-    process.stderr.write(`${filePath}: error reading file (${err.message})\n`);
+    logMessage(`${filePath}: error reading file (${err.message})\n`, "error");
     return;
   }
 
@@ -57,14 +58,16 @@ export async function processOne(filePath: string, options: ScanOptions) {
       artist: extractArtist(filePath),
       nsfw: matchedTags.find((tag) => tag === "NSFW") ? true : false,
     };
-    console.log(
-      "File '",
-      filePath,
-      "' is new and has matched tags, adding to database.",
+    logMessage(
+      `File '${filePath}' is new and has matched tags, adding to database.`,
+      "info",
     );
     displayFileBatchWriter.add(df);
   }
-  console.log("File '", filePath, "' is new, adding fingerprint to database.");
+  logMessage(
+    `File '${filePath}' is new, adding fingerprint to database.`,
+    "info",
+  );
   await fingerprintWriter.add({ path: filePath, ...fingerprint });
   return;
 }
@@ -112,8 +115,9 @@ export async function* walkXmpFiles(
   try {
     entries = await fs.promises.readdir(dir, { withFileTypes: true });
   } catch (err: any) {
-    process.stderr.write(
+    logMessage(
       `\nWarning: cannot read directory ${dir}: ${err.message}\n`,
+      "warn",
     );
     return;
   }

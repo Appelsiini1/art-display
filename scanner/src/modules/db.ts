@@ -6,6 +6,7 @@ import {
   QueryConfig,
 } from "../models/types";
 import { setInterval } from "node:timers";
+import { logMessage } from "./util";
 
 const dbContext: { pool: null | Pool } = {
   pool: null,
@@ -19,7 +20,7 @@ export function initDbPool() {
   // the pool will emit an error on behalf of any idle clients
   // it contains if a backend error or network partition happens
   pool.on("error", (err, client) => {
-    console.error("Unexpected error on idle client", err);
+    logMessage(`Unexpected error on idle client ${err.message}`, "error");
     process.exit(-1);
   });
   dbContext.pool = pool;
@@ -166,8 +167,9 @@ class FingerprintBatchWriter {
     setInterval(
       () =>
         this.flush().catch((err) => {
-          process.stderr.write(
+          logMessage(
             `Fingerprint batch flush error: ${err.message}\n`,
+            "error",
           );
         }),
       flushIntervalMs,
@@ -234,8 +236,9 @@ class DisplayFileBatchWriter {
     setInterval(
       () =>
         this.flush().catch((err) => {
-          process.stderr.write(
+          logMessage(
             `Fingerprint batch flush error: ${err.message}\n`,
+            "error",
           );
         }),
       flushIntervalMs,

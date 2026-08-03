@@ -8,7 +8,7 @@ import {
   initDbTables,
   insertRow,
 } from "./modules/database";
-import { getFile, transfromToDTO } from "./modules/util";
+import { getFile, logMessage, transfromToDTO } from "./modules/util";
 const cors = require("cors");
 
 const PORT = 9000;
@@ -24,7 +24,7 @@ app.use(cors());
 }); */
 initDbTables().then(() => {
   app.listen(PORT, () => {
-    console.log(`Server online at http://localhost:${PORT}`);
+    logMessage(`Server online at http://localhost:${PORT}`, "info");
     DB_INIT = 1;
   });
 });
@@ -52,7 +52,7 @@ app.get(
       }
     } catch (err: any) {
       res.status(500).send("Internal Server Error");
-      console.error(err.message);
+    logMessage(err.message, "error");
     }
   },
 );
@@ -89,7 +89,7 @@ app.get("/img", query("id").trim().notEmpty().isInt(), async (req, res) => {
         .send(`File with '${req.query?.id}' not found in the database.`);
     } else {
       res.status(500).send("Internal Server Error");
-      console.error(err.message);
+      logMessage(err.message, "error");
     }
   }
 });
@@ -102,7 +102,7 @@ app.get("/img/random", async (req, res) => {
     res.status(200).json(transfromToDTO(imgInfo));
   } catch (err: any) {
     res.status(500).send("Internal Server Error");
-    console.error(err.message);
+    logMessage(err.message, "error");
   }
 });
 
@@ -168,7 +168,7 @@ app.post("/metadata", async (req, res) => {
       }
     } catch (err: any) {
       res.status(500).send("Internal Server Error");
-      console.error(err.message);
+      logMessage(err.message, "error");
     }
   }
 });
@@ -182,7 +182,7 @@ app.get("/metadata/get", query("name").trim().notEmpty(), async (req, res) => {
       res.status(200).send({ id: req.query?.name, value: value });
     } catch (err: any) {
       res.status(500).send("Internal Server Error");
-      console.error(err.message);
+      logMessage(err.message, "error");
     }
   }
 });

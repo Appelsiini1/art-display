@@ -131,3 +131,15 @@ export function getDBStatus(): Promise<Boolean> {
 export function stripXmpExtension(filePath: string): string {
   return filePath.replace(/\.xmp$/i, "");
 }
+
+export function logMessage(msg: string, level: "info" | "error" | "warn") {
+  const time = new Date();
+  const message = `${time.toLocaleString()} | ${level.toLocaleUpperCase()} | ${msg}`;
+  if (level === "info") {
+    console.log(message);
+  } else if (level === "error") {
+    console.error(message);
+  } else {
+    console.warn(message);
+  }
+}

@@ -28,7 +28,7 @@ function getMIMEType(filepath: string): string {
     }
     return dataString;
   } catch (err: any) {
-    console.error("Error in getMIMEType():", err.message);
+    logMessage(`Error in getMIMEType(): ${err.message}`, "error");
     throw err;
   }
 }
@@ -53,8 +53,7 @@ export async function getFile(res: Response, filepath: string) {
         resolve(null);
       });
     } catch (err: any) {
-      console.error("Error in getFile():");
-      console.error(err.message);
+      logMessage(`Error in getFile(): ${err.message}`, "error");
       reject(null);
     }
   });
@@ -62,4 +61,16 @@ export async function getFile(res: Response, filepath: string) {
 
 export function transfromToDTO(imgInfo: DisplayFile): DisplayFileDTO {
   return { ...imgInfo, file: path.basename(imgInfo.path) };
+}
+
+export function logMessage(msg: string, level: "info" | "error" | "warn") {
+  const time = new Date();
+  const message = `${time.toLocaleString()} | ${level.toLocaleUpperCase()} | ${msg}`;
+  if (level === "info") {
+    console.log(message);
+  } else if (level === "error") {
+    console.error(message);
+  } else {
+    console.warn(message);
+  }
 }
