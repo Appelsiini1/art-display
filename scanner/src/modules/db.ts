@@ -5,7 +5,7 @@ import {
   FingerprintUpdate,
 } from "../models/types";
 import { setInterval } from "node:timers";
-import { logMessage } from "./util";
+import { logMessage, stripXmpExtension } from "./util";
 
 const dbContext: { pool: null | Pool } = {
   pool: null,
@@ -197,3 +197,86 @@ class DisplayFileBatchWriter {
 }
 
 export const displayFileBatchWriter = new DisplayFileBatchWriter();
+
+class DisplayFileDeleteWriter {
+  private buffer: string[] = [];
+  private flushing: Promise<void> | null = null;
+
+  constructor(
+    private batchSize = 500,
+    private flushIntervalMs = 2000,
+  ) {
+    setInterval(
+      () =>
+        this.flush().catch((err) => {
+          logMessage(
+            `Display file delete batch flush error: ${err.message}\n`,
+            "error",
+          );
+        }),
+      flushIntervalMs,
+    ).unref();
+  }
+
+  async add(path: string): Promise<void> {
+    this.buffer.push(path);
+    if (this.buffer.length >= this.batchSize) {
+      await this.flush();
+    }
+  }
+
+  async flush(): Promise<void> {
+    if (this.flushing) return this.flushing;
+    if (this.buffer.length === 0) return;
+
+    const batch = this.buffer;
+    this.buffer = [];
+
+    this.flushing = this.writeBatch(batch).finally(() => {
+      this.flushing = null;
+    });
+    return this.flushing;
+  }
+
+  private async writeBatch(batch: string[]): Promise<void> {
+    if (batch.length === 0) return;
+    await execQuery({
+      text: `DELETE FROM display_files WHERE path = ANY($1::text[])`,
+      values: [batch],
+    });
+  }
+
+  async close(): Promise<void> {
+    await this.flush();
+  }
+}
+
+export const displayFileDeleteWriter = new DisplayFileDeleteWriter();
+
+export async function selectAllFingerprintPaths(): Promise<string[]> {
+  const result = await execQuery(`SELECT path FROM xmp_fingerprints`);
+  return result?.rows.map((r: { path: string }) => r.path) ?? [];
+}
+
+export async function deleteStaleFingerprintsAndDisplayFiles(
+  staleXmpPaths: string[],
+): Promise<{ fingerprints: number; displayFiles: number }> {
+  if (staleXmpPaths.length === 0) {
+    return { fingerprints: 0, displayFiles: 0 };
+  }
+  const strippedPaths = staleXmpPaths.map(stripXmpExtension);
+
+  const fpResult = await execQuery({
+    text: `DELETE FROM xmp_fingerprints WHERE path = ANY($1::text[])`,
+    values: [staleXmpPaths],
+  });
+  const dfResult = await execQuery({
+    text: `DELETE FROM display_files WHERE path = ANY($1::text[])`,
+    values: [strippedPaths],
+  });
+
+  return {
+    fingerprints: fpResult?.rowCount ?? 0,
+    displayFiles: dfResult?.rowCount ?? 0,
+  };
+}

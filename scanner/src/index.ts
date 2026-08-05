@@ -1,10 +1,63 @@
-import { fingerprintWriter } from "./modules/db";
-import { getDBStatus, logMessage, waitForDb } from "./modules/util";
+import {
+  fingerprintWriter,
+  displayFileBatchWriter,
+  displayFileDeleteWriter,
+  selectAllFingerprintPaths,
+  deleteStaleFingerprintsAndDisplayFiles,
+} from "./modules/db";
+import {
+  getDBStatus,
+  logMessage,
+  waitForDb,
+  RECONCILE_MAX_STALE_FRACTION,
+  RECONCILE_FORCE,
+} from "./modules/util";
 import {
   processOne,
   processFilesConcurrently,
   walkXmpFiles,
 } from "./modules/xmpProcess";
+
+async function reconcile(walked: Set<string>): Promise<void> {
+  const dbPaths = await selectAllFingerprintPaths();
+  if (dbPaths.length === 0) {
+    logMessage(
+      "Reconciliation: nothing to sweep (fingerprint table empty).",
+      "info",
+    );
+    return;
+  }
+  const stale = dbPaths.filter((p) => !walked.has(p));
+  const fraction = stale.length / dbPaths.length;
+
+  if (stale.length === 0) {
+    logMessage(
+      `Reconciliation: no stale rows (walked ${walked.size}, stored ${dbPaths.length}).`,
+      "info",
+    );
+    return;
+  }
+
+  if (fraction > RECONCILE_MAX_STALE_FRACTION) {
+    if (!RECONCILE_FORCE) {
+      logMessage(
+        `Reconciliation: skipped, stale fraction ${fraction.toFixed(4)} exceeds threshold ${RECONCILE_MAX_STALE_FRACTION}. Set RECONCILE_FORCE=1 to bypass.`,
+        "warn",
+      );
+      return;
+    }
+    logMessage(
+      `Reconciliation: RECONCILE_FORCE=1 bypassed guard (stale fraction ${fraction.toFixed(4)}). Proceeding with delete.`,
+      "info",
+    );
+  }
+
+  const removed = await deleteStaleFingerprintsAndDisplayFiles(stale);
+  logMessage(
+    `Reconciliation: removed ${removed.fingerprints} stale fingerprints, ${removed.displayFiles} display_files rows (walked ${walked.size}, stored ${dbPaths.length}).`,
+    "info",
+  );
+}
 
 async function main() {
   const options = {
@@ -32,15 +85,50 @@ async function main() {
   const runScan = async () => {
     if (running) return;
     running = true;
+    let sweepAllowed = true;
+    const walked = new Set<string>();
     try {
-      if (await getDBStatus()) {
-        logMessage("Starting scan...", "info");
+      if (!(await getDBStatus())) return;
+      logMessage("Starting scan...", "info");
+
+      try {
         await processFilesConcurrently(
           walkXmpFiles(dirArg, dirArg, ignore),
           options,
           processOne,
+          walked,
         );
-        await fingerprintWriter.close(); // flush any remainder sitting in the buffer
+      } catch (err: any) {
+        sweepAllowed = false;
+        logMessage(
+          `Walk error: ${err && err.stack ? err.stack : err}`,
+          "error",
+        );
+      }
+
+      try {
+        await fingerprintWriter.close();
+        await displayFileBatchWriter.close();
+        await displayFileDeleteWriter.close();
+      } catch (err: any) {
+        sweepAllowed = false;
+        logMessage(
+          `Batch flush error on close: ${err && err.stack ? err.stack : err}`,
+          "error",
+        );
+      }
+
+      if (!sweepAllowed) {
+        logMessage("Reconciliation: skipped due to unclean walk.", "warn");
+      } else {
+        try {
+          await reconcile(walked);
+        } catch (err: any) {
+          logMessage(
+            `Reconciliation error: ${err && err.stack ? err.stack : err}`,
+            "error",
+          );
+        }
       }
     } finally {
       running = false;

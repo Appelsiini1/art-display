@@ -19,6 +19,17 @@ const RETRYABLE_ERROR_CODES = new Set([
 const ACCETABLE_FILE_EXTENSIONS = [".png", ".jpg", ".jpeg", ".gif", ".svg"];
 const LOG_LEVEL = process.env.LOG_LEVEL || "info";
 
+function parseReconcileMaxStaleFraction(): number {
+  const raw = process.env.RECONCILE_MAX_STALE_FRACTION;
+  if (raw === undefined || raw === "") return 0.2;
+  const n = Number(raw);
+  if (!Number.isFinite(n) || n <= 0 || n > 1) return 0.2;
+  return n;
+}
+
+export const RECONCILE_MAX_STALE_FRACTION = parseReconcileMaxStaleFraction();
+export const RECONCILE_FORCE = process.env.RECONCILE_FORCE === "1";
+
 function sleep(ms: number) {
   if (ms <= 0) return Promise.resolve();
   return new Promise((resolve) => setTimeout(resolve, ms));

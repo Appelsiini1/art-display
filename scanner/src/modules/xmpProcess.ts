@@ -17,6 +17,7 @@ import {
   getCachedFingerprint,
   fingerprintWriter,
   displayFileBatchWriter,
+  displayFileDeleteWriter,
 } from "./db";
 
 export async function processOne(filePath: string, options: ScanOptions) {
@@ -61,7 +62,14 @@ export async function processOne(filePath: string, options: ScanOptions) {
 
   const tags = extractAllTags(content);
 
-  if (containsIgnoreTags(tags)) return;
+  if (containsIgnoreTags(tags)) {
+    logMessage(
+      `File '${filePath}' has IGNORE tag; purging any display_files row.`,
+      "debug",
+    );
+    displayFileDeleteWriter.add(stripXmpExtension(filePath));
+    return;
+  }
 
   const matchedTags = findMatchingTags(tags, ["NSFW", "SFW"]);
   if (matchedTags.length > 0) {
@@ -77,9 +85,10 @@ export async function processOne(filePath: string, options: ScanOptions) {
     displayFileBatchWriter.add(df);
   } else {
     logMessage(
-      `Skipping file '${path.basename(filePath)}' based on no matching tags found.`,
+      `File '${filePath}' has no matching tags; purging any display_files row.`,
       "debug",
     );
+    displayFileDeleteWriter.add(stripXmpExtension(filePath));
   }
   logMessage(
     `File '${filePath}' is new, adding fingerprint to database.`,
@@ -93,12 +102,14 @@ export async function processFilesConcurrently(
   asyncIterable: any,
   options: ScanOptions,
   perFile: Function,
+  walkedSet?: Set<string>,
 ) {
   const iterator = asyncIterable[Symbol.asyncIterator]();
   async function worker() {
     while (true) {
       const { value, done } = await iterator.next();
       if (done) return;
+      if (walkedSet) walkedSet.add(value);
       await perFile(value, options);
     }
   }
