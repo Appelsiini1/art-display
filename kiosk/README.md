@@ -1,6 +1,6 @@
 # How to use
 
-Place kiosk.sh to home folder
+Place kiosk.sh to home folder **AND REPLACE THE URL TO POINT TO YOUR SERVER** (or copy the 'public' folder onto the device and point Chrome to the index.html file)
 
 Place kiosk.service & xsession.target to `~/.config/systemd/user/`
 
