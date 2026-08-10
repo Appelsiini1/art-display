@@ -17,6 +17,7 @@ let imgInfoB = null;
 const artistEL = document.getElementById("artist");
 const fileEL = document.getElementById("file");
 const ratingEL = document.getElementById("rating");
+const dimensionsEL = document.getElementById("dimensions");
 //const typeEL = document.getElementById("type-field");
 
 function getClassList(elementID) {
@@ -68,8 +69,10 @@ async function getImage(elementID) {
               case "img-B":
                 blobB = objectURL;
             }
-            document.getElementById(elementID).src = objectURL;
-            resolve(null);
+            const imageElement = document.getElementById(elementID);
+            imageElement.onload = () => resolve(null);
+            imageElement.onerror = (error) => reject(error);
+            imageElement.src = objectURL;
           });
       })
       .catch((reason) => {
@@ -132,10 +135,14 @@ function setImgPosition(elementID) {
 
 function setFileDetails(elementID) {
   const imgDetails = elementID == "img-A" ? imgInfoA : imgInfoB;
+  const imageElement = document.getElementById(elementID);
+  const width = imageElement.naturalWidth || 0;
+  const height = imageElement.naturalHeight || 0;
 
   artistEL.innerText = `Artist: ${imgDetails.artist}`;
   fileEL.innerText = `File: ${imgDetails.file}`;
   ratingEL.innerText = `Rating: ${imgDetails.nsfw ? "NSFW" : "SFW"}`;
+  dimensionsEL.innerText = `Dimensions: ${width} x ${height}`;
   //typeEL.innerText = `Type: ${imgDetails.type}`;
 }
 
