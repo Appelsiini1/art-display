@@ -9,6 +9,7 @@ import {
   insertRow,
 } from "./modules/database";
 import { getFile, logMessage, transfromToDTO } from "./modules/util";
+import { isSafeImagePath } from "./modules/fileSecurity";
 const cors = require("cors");
 
 const PORT = 9000;
@@ -42,7 +43,12 @@ app.get("/img/file", query("id").trim().notEmpty(), async (req, res) => {
           .status(404)
           .send(`File with '${req.query?.id}' not found in the database.`);
       } else {
-        getFile(res, imgInfo.path);
+        const safe = await isSafeImagePath(imgInfo.path);
+        if (!safe) {
+          res.status(404).send("File not found.");
+          return;
+        }
+        getFile(res, imgInfo.path)
       }
     } else {
       res.status(400).send("Invalid request.");
@@ -93,7 +99,28 @@ app.get("/img", query("id").trim().notEmpty(), async (req, res) => {
 app.get("/img/random", async (req, res) => {
   try {
     const rating = await getMetadataValue("currentRating");
-    const imgInfo = await getRandomDisplayFile(rating ? rating.value : "sfw");
+    const maxAttempts = 10;
+    let attempts = 0;
+    let imgInfo: any = undefined;
+    while (attempts < maxAttempts) {
+      const candidate = await getRandomDisplayFile(rating ? rating.value : "sfw");
+      if (!candidate) {
+        attempts += 1;
+        continue;
+      }
+      const safe = await isSafeImagePath(candidate.path);
+      if (!safe) {
+        attempts += 1;
+        logMessage(`Skipping invalid image candidate`, "warn");
+        continue;
+      }
+      imgInfo = candidate;
+      break;
+    }
+    if (!imgInfo) {
+      res.status(404).send("No valid images available.");
+      return;
+    }
     logMessage(`Serving '${imgInfo.path}'`, "info");
     res.status(200).json(transfromToDTO(imgInfo));
   } catch (err: any) {

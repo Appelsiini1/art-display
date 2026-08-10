@@ -2,36 +2,9 @@ import fs from "node:fs";
 import path from "node:path";
 import { Response } from "express";
 import { DisplayFile, DisplayFileDTO } from "../models/types";
+import { detectImageMimeType } from "./fileSecurity";
 
-function getMIMEType(filepath: string): string {
-  try {
-    const extension = path.extname(filepath);
-    let dataString = `image/`;
-    switch (extension.replace(".", "").toLowerCase()) {
-      case "png":
-        dataString += "png";
-        break;
-      case "jpg":
-        dataString += "jpeg";
-        break;
-      case "jpeg":
-        dataString += "jpeg";
-        break;
-      case "gif":
-        dataString += "gif";
-        break;
-      case "svg":
-        dataString += "svg+xml";
-        break;
-      default:
-        throw new Error("error_unsupported_image");
-    }
-    return dataString;
-  } catch (err: any) {
-    logMessage(`Error in getMIMEType(): ${err.message}`, "error");
-    throw err;
-  }
-}
+const LOG_LEVEL = process.env.LOG_LEVEL || "info";
 
 // From https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random
 export function getRandomIntInclusive(min: number, max: number) {
@@ -41,16 +14,22 @@ export function getRandomIntInclusive(min: number, max: number) {
 }
 
 export async function getFile(res: Response, filepath: string) {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     try {
       const { size } = fs.statSync(filepath);
+      const mime = await detectImageMimeType(filepath);
+      if (!mime) throw new Error("error_unsupported_image");
       const rs = fs.createReadStream(filepath);
-      res.setHeader("Content-Type", getMIMEType(filepath));
+      res.setHeader("Content-Type", mime);
       res.setHeader("Content-Length", size);
       rs.pipe(res);
 
       rs.on("end", () => {
         resolve(null);
+      });
+      rs.on("error", (e) => {
+        logMessage(`Stream error in getFile(): ${e.message}`, "error");
+        reject(null);
       });
     } catch (err: any) {
       logMessage(`Error in getFile(): ${err.message}`, "error");
@@ -62,8 +41,6 @@ export async function getFile(res: Response, filepath: string) {
 export function transfromToDTO(imgInfo: DisplayFile): DisplayFileDTO {
   return { ...imgInfo, file: path.basename(imgInfo.path) };
 }
-
-const LOG_LEVEL = process.env.LOG_LEVEL || "info";
 
 export function logMessage(
   msg: string,
