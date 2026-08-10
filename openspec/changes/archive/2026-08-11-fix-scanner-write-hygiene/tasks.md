@@ -12,12 +12,12 @@
 ## 3. Verification
 
 - [x] 3.1 Run `npx tsc --noEmit` in `scanner/` — no errors
-- [ ] 3.2 Local run: scan a directory with an IGNORE-tagged file, then run again → confirm the second scan logs "Skipping file '...' based on unchanged metadata." for that file (indicating fingerprint cache hit)
-- [ ] 3.3 Local run: simulate a batch flush failure (e.g., temporarily drop DB permission for `display_files`) mid-scan → confirm the walk aborts, an error is logged, reconciliation is skipped with the unclean-walk message, and the scan loop stays alive for the next daily interval
-- [ ] 3.4 Local run: verify the IGNORE-branch fingerprint is written even on the first observation (query `SELECT * FROM xmp_fingerprints WHERE path = '<ignored-file.xmp>'` and confirm a row exists after the scan)
+- [x] 3.2 Local run: scan a directory with an IGNORE-tagged file, then run again → confirm the second scan logs "Skipping file '...' based on unchanged metadata." for that file (indicating fingerprint cache hit)
+- [x] 3.3 Local run: simulate a batch flush failure (e.g., temporarily drop DB permission for `display_files`) mid-scan → confirm the walk aborts, an error is logged, reconciliation is skipped with the unclean-walk message, and the scan loop stays alive for the next daily interval
+- [x] 3.4 Local run: verify the IGNORE-branch fingerprint is written even on the first observation (query `SELECT * FROM xmp_fingerprints WHERE path = '<ignored-file.xmp>'` and confirm a row exists after the scan)
 
 ## 4. Archive prep
 
-- [ ] 4.1 Confirm `add-scanner-reconciliation` has been archived (the MODIFIED delta in this change targets the reconciliation-updated requirement)
+- [x] 4.1 Confirm `add-scanner-reconciliation` has been archived (the MODIFIED delta in this change targets the reconciliation-updated requirement)
 - [x] 4.2 Run `openspec validate fix-scanner-write-hygiene --strict`
 - [ ] 4.3 Run `openspec archive fix-scanner-write-hygiene` after review to fold the updated IGNORE scenario into `openspec/specs/scanner/spec.md`
