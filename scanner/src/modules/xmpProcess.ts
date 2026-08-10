@@ -67,7 +67,8 @@ export async function processOne(filePath: string, options: ScanOptions) {
       `File '${filePath}' has IGNORE tag; purging any display_files row.`,
       "debug",
     );
-    displayFileDeleteWriter.add(stripXmpExtension(filePath));
+    await displayFileDeleteWriter.add(stripXmpExtension(filePath));
+    await fingerprintWriter.add({ path: filePath, ...fingerprint });
     return;
   }
 
@@ -82,13 +83,13 @@ export async function processOne(filePath: string, options: ScanOptions) {
       `File '${filePath}' is new and has matched tags, adding to database.`,
       "debug",
     );
-    displayFileBatchWriter.add(df);
+    await displayFileBatchWriter.add(df);
   } else {
     logMessage(
       `File '${filePath}' has no matching tags; purging any display_files row.`,
       "debug",
     );
-    displayFileDeleteWriter.add(stripXmpExtension(filePath));
+    await displayFileDeleteWriter.add(stripXmpExtension(filePath));
   }
   logMessage(
     `File '${filePath}' is new, adding fingerprint to database.`,
