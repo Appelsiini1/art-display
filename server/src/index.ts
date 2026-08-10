@@ -173,9 +173,10 @@ app.get("/metadata/get", query("name").trim().notEmpty(), async (req, res) => {
   const result = validationResult(req);
   if (result.isEmpty()) {
     try {
-      const value = await getMetadataValue(req.query?.name);
+      const result = await getMetadataValue(req.query?.name);
+      logMessage(`Serving metadata value with id ${req.query?.name}. Value: ${result?.value}`, "info");
 
-      res.status(200).send({ id: req.query?.name, value: value });
+      res.status(200).send({ id: req.query?.name, value: result?.value });
     } catch (err: any) {
       res.status(500).send("Internal Server Error");
       logMessage(err.message, "error");
