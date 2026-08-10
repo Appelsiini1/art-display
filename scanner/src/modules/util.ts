@@ -4,6 +4,17 @@ import { ScanOptions, FileFingerprint } from "../models/types";
 import { basename, extname } from "node:path";
 
 const RDF_LI_RE = /<rdf:li[^>]*>\s*([^<]+?)\s*<\/rdf:li>/g;
+
+const DEFAULT_ARTIST_FOLDER_PREFIX = "Artist Archive";
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&");
+}
+
+const ARTIST_RE = new RegExp(
+  process.env.ARTIST_FOLDER_REGEX ??
+    `${escapeRegExp(DEFAULT_ARTIST_FOLDER_PREFIX)}[\\/\\\\]+([^\\/\\\\]+)`,
+);
+
 export let IGNORE_SET: Set<string> =
   new Set(process.env.IGNORE_TAGS?.split(",")) || null;
 
@@ -121,8 +132,6 @@ export function containsIgnoreTags(tagList: string[]): Boolean {
   if (IGNORE_SET === null) return false;
   return tagList.some((item) => IGNORE_SET.has(item));
 }
-
-const ARTIST_RE = /Artist Archive[\/\\]+([^\/\\]+)/;
 
 export function extractArtist(filePath: string) {
   const match = filePath.match(ARTIST_RE);
