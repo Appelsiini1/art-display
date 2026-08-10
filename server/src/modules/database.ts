@@ -128,11 +128,11 @@ export async function getDisplayFileById(
 }
 
 export async function getMetadataValue(
-  id: string,
+  name: string,
 ): Promise<MetadataRow | undefined> {
   const query = {
-    text: "SELECT name, value FROM metadata WHERE name=$1",
-    values: [id],
+    text: "SELECT id, name, value FROM metadata WHERE name=$1",
+    values: [name],
   };
   const result = await execQuery(query);
   if (!result) return undefined;
