@@ -140,6 +140,11 @@ img {
   padding: 0.5em;
 }
 
+.file-id {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.95em;
+}
+
 html {
   scrollbar-width: none;
 } /* Firefox */

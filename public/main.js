@@ -18,7 +18,7 @@ const artistEL = document.getElementById("artist");
 const fileEL = document.getElementById("file");
 const ratingEL = document.getElementById("rating");
 const dimensionsEL = document.getElementById("dimensions");
-//const typeEL = document.getElementById("type-field");
+const idEL = document.getElementById("file-id");
 
 function getClassList(elementID) {
   return document.getElementById(elementID).classList;
@@ -143,7 +143,7 @@ function setFileDetails(elementID) {
   fileEL.innerText = `File: ${imgDetails.file}`;
   ratingEL.innerText = `Rating: ${imgDetails.nsfw ? "NSFW" : "SFW"}`;
   dimensionsEL.innerText = `Dimensions: ${width} x ${height}`;
-  //typeEL.innerText = `Type: ${imgDetails.type}`;
+  idEL.innerText = `ID: ${imgDetails.id}`;
 }
 
 function slideHandler() {
