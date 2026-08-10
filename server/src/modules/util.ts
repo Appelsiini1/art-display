@@ -63,10 +63,22 @@ export function transfromToDTO(imgInfo: DisplayFile): DisplayFileDTO {
   return { ...imgInfo, file: path.basename(imgInfo.path) };
 }
 
-export function logMessage(msg: string, level: "info" | "error" | "warn") {
+const LOG_LEVEL = process.env.LOG_LEVEL || "info";
+
+export function logMessage(
+  msg: string,
+  level: "debug" | "info" | "error" | "warn",
+) {
+  if (
+    (level === "debug" && LOG_LEVEL === "info") ||
+    ((level === "info" || level === "debug") && LOG_LEVEL === "warn") ||
+    ((level === "debug" || level === "info" || level === "warn") &&
+      LOG_LEVEL === "error")
+  )
+    return;
   const time = new Date();
   const message = `${time.toLocaleString()} | ${level.toLocaleUpperCase()} | ${msg}`;
-  if (level === "info") {
+  if (level === "info" || level === "debug") {
     console.log(message);
   } else if (level === "error") {
     console.error(message);
