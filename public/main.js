@@ -3,8 +3,10 @@ const fadeDelay = 2900;
 const slideInterval = 900;
 const windowHeight = document.getElementById("img-container").clientHeight;
 const windowWidth = document.getElementById("img-container").clientWidth;
-//const apiURL = "http://localhost:9000";
-const apiURL = "http://starlight-rise:54560";
+const apiURL =
+  window.location.protocol === "http:" || window.location.protocol === "https:"
+    ? window.location.origin
+    : "http://localhost:9000";
 
 let blobA = null;
 let blobB = null;

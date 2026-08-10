@@ -135,7 +135,7 @@ img {
   max-height: 15vh;
   position: absolute;
   left: 0;
-  bottom: 0;
+  top: 0;
   color: rgba(255, 255, 255, 0.7);
   padding: 0.5em;
 }

@@ -1,6 +1,8 @@
 services:
   api:
-    build: ./server # directory containing your Dockerfile
+    build:
+      context: .
+      dockerfile: server/Dockerfile
     ports:
       - 54560:9000 # only the API is exposed to the host
     environment:
