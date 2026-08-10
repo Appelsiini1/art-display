@@ -1,0 +1,9 @@
+# Ignore built distribution to ensure Docker builds from source
+server/dist
+scanner/dist
+
+# Common ignores
+node_modules
+.env
+npm-debug.log
+dist
