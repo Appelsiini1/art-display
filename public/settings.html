@@ -12,9 +12,30 @@
       <header class="settings-header">
         <div>
           <h1>Metadata Settings</h1>
-          <p>View and update metadata values using the existing server API.</p>
+          <p>View and update metadata values.</p>
         </div>
       </header>
+
+      <section class="current-rating-panel">
+        <div class="current-rating-header">
+          <div>
+            <h2>Current Rating</h2>
+            <p>Change the active image rating filter that controls what the display API returns.</p>
+          </div>
+          <div class="current-rating-value">
+            <span>Active rating:</span>
+            <strong id="current-rating-value">Loading...</strong>
+          </div>
+        </div>
+
+        <div class="rating-button-row">
+          <button class="rating-button" type="button" data-rating="all">all</button>
+          <button class="rating-button" type="button" data-rating="sfw">sfw</button>
+          <button class="rating-button" type="button" data-rating="nsfw">nsfw</button>
+        </div>
+
+        <div id="current-rating-status" class="status-message" aria-live="polite"></div>
+      </section>
 
       <section class="settings-panel">
         <div class="settings-row">

@@ -1,0 +1,9 @@
+- [x] Update `public/settings.html` to add a dedicated `Current Rating` panel with three buttons for `all`, `sfw`, and `nsfw`.
+- [x] Update `public/settings.js` to:
+  - Fetch and render the current `currentRating` value on page load.
+  - Save changes to `currentRating` using the existing `POST /metadata` endpoint.
+  - Refresh the metadata list after updating `currentRating`.
+  - Exclude `currentRating` from the generic metadata table so it remains a separate control.
+- [x] Update `public/styles.css` with styles for the new rating control panel and active button state.
+- [x] Verify the settings page loads the current rating, always shows the current rating control, and allows switching between `all`, `sfw`, and `nsfw`.
+- [x] Confirm the general metadata list still works for other values and does not duplicate `currentRating`.
