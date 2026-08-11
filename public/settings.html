@@ -1,0 +1,58 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Metadata Settings</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="/styles.css" />
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  </head>
+  <body class="settings-page">
+    <main class="settings-container">
+      <header class="settings-header">
+        <div>
+          <h1>Metadata Settings</h1>
+          <p>View and update metadata values using the existing server API.</p>
+        </div>
+      </header>
+
+      <section class="settings-panel">
+        <div class="settings-row">
+          <label for="metadata-key">Key</label>
+          <input id="metadata-key" type="text" placeholder="Enter metadata key" />
+        </div>
+
+        <div class="settings-row">
+          <label for="metadata-value">Value</label>
+          <input id="metadata-value" type="text" placeholder="Enter metadata value" />
+        </div>
+
+        <div class="settings-row button-row">
+          <button id="load-value-button" type="button">Load value</button>
+          <button id="save-value-button" type="button">Save value</button>
+          <button id="refresh-all-button" type="button">Refresh list</button>
+        </div>
+
+        <div id="status-message" class="status-message" aria-live="polite"></div>
+      </section>
+
+      <section class="metadata-list-panel">
+        <div class="metadata-list-header">
+          <h2>Current metadata values</h2>
+        </div>
+        <table class="metadata-table">
+          <thead>
+            <tr>
+              <th>Key</th>
+              <th>Value</th>
+            </tr>
+          </thead>
+          <tbody id="metadata-list-body">
+          </tbody>
+        </table>
+      </section>
+    </main>
+
+    <script src="/settings.js"></script>
+  </body>
+</html>

@@ -2,11 +2,13 @@ import express from "express";
 import path from "node:path";
 import { query, validationResult } from "express-validator";
 import {
+  allMetadataValues,
   getDisplayFileById,
   getMetadataValue,
   getRandomDisplayFile,
   initDbTables,
   insertRow,
+  updateRow,
 } from "./modules/database";
 import { getFile, logMessage, transfromToDTO } from "./modules/util";
 import { isSafeImagePath } from "./modules/fileSecurity";
@@ -151,7 +153,11 @@ app.post("/metadata", async (req, res) => {
           .status(200)
           .send(`Added metadata value with id ${valueID} to database.`);
       } else {
-        await insertRow("metadata", { name: valueID, value });
+        await updateRow(
+          "metadata",
+          { value },
+          { name: valueID },
+        );
         res
           .status(200)
           .send(`Updated metadata value with id ${valueID} in the database.`);
@@ -176,5 +182,18 @@ app.get("/metadata/get", query("name").trim().notEmpty(), async (req, res) => {
       res.status(500).send("Internal Server Error");
       logMessage(err.message, "error");
     }
+  }
+});
+
+//URL/metadata/get/all
+app.get("/metadata/get/all", async (req, res) => {
+  try {
+    const result = await allMetadataValues();
+    logMessage(`Serving all metadata values. Count: ${result.length}`, "info");
+
+    res.status(200).send({ metadata: result });
+  } catch (err: any) {
+    res.status(500).send("Internal Server Error");
+    logMessage(err.message, "error");
   }
 });

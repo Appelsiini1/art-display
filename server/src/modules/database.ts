@@ -139,6 +139,15 @@ export async function getMetadataValue(
   return result.rows[0];
 }
 
+export async function allMetadataValues(): Promise<MetadataRow[]> {
+  const query = {
+    text: "SELECT id, name, value FROM metadata",
+  };
+  const result = await execQuery(query);
+  if (!result) return [];
+  return result.rows;
+}
+
 export async function insertRow<T extends Record<string, any>>(
   table: string,
   data: T,
@@ -168,7 +177,7 @@ export async function insertRow<T extends Record<string, any>>(
 }
 
 export async function updateRow<
-  T extends { id: any },
+  T extends { value: any },
   W extends Record<string, any>,
 >(
   table: string,
