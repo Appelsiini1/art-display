@@ -27,10 +27,7 @@ app.use((req, res, next) => {
   res.setHeader('Content-Security-Policy', csp);
   next();
 });
-/* app.use((req, res) => {
-  res.status(404);
-  res.send("<h1>Error 404: Resource not found.</h1>");
-}); */
+
 initDbTables().then(() => {
   app.listen(PORT, () => {
     logMessage(`Server online at http://localhost:${PORT}`, "info");
@@ -38,7 +35,7 @@ initDbTables().then(() => {
   });
 });
 
-//URL/img?id=value
+//URL/img/file?id=value
 app.get("/img/file", query("id").trim().notEmpty(), async (req, res) => {
   const result = validationResult(req);
   try {
@@ -74,6 +71,7 @@ app.get("/status", async (req, res) => {
   }
 });
 
+//URL/img?id=value
 app.get("/img", query("id").trim().notEmpty(), async (req, res) => {
   const result = validationResult(req);
   try {
@@ -137,48 +135,9 @@ app.get("/img/random", async (req, res) => {
   }
 });
 
-// app.post(
-//   "/database/update",
-//   checkSchema(displayFileSchemaUpdate, ["body"]),
-//   async (req: Request, res: Response) => {
-//     try {
-//       const result = validationResult(req);
-//       if (result.isEmpty()) {
-//         const rq_body = req.body;
-//         await updateDisplayFilesToDB(rq_body);
-//         res.status(200).send("Operation successful.");
-//       } else {
-//         res.status(400).send("Invalid request.");
-//       }
-//     } catch (err: any) {
-//       res.status(500).send("Internal Server Error");
-//       console.error(err.message);
-//     }
-//   },
-// );
-
-// app.post(
-//   "/database/add",
-//   checkSchema(displayFileSchema, ["body"]),
-//   async (req: Request, res: Response) => {
-//     try {
-//       const result = validationResult(req);
-//       if (result.isEmpty()) {
-//         const rq_body = req.body;
-//         await addDisplayFileToDB(rq_body);
-//         res.status(200).send("Operation successful.");
-//       } else {
-//         res.status(400).send("Invalid request.");
-//       }
-//     } catch (err: any) {
-//       res.status(500).send("Internal Server Error");
-//       console.error(err.message);
-//     }
-//   },
-// );
-
+//URL/metadata?name=value
 app.post("/metadata", async (req, res) => {
-  const valueID = req.query.id?.toString();
+  const valueID = req.query.name?.toString();
   const value = req.query.value?.toString();
 
   if (!value || !valueID) {
@@ -204,6 +163,7 @@ app.post("/metadata", async (req, res) => {
   }
 });
 
+//URL/metadata/get?name=value
 app.get("/metadata/get", query("name").trim().notEmpty(), async (req, res) => {
   const result = validationResult(req);
   if (result.isEmpty()) {
