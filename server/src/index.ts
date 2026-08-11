@@ -10,7 +10,6 @@ import {
 } from "./modules/database";
 import { getFile, logMessage, transfromToDTO } from "./modules/util";
 import { isSafeImagePath } from "./modules/fileSecurity";
-const cors = require("cors");
 
 const PORT = 9000;
 const app = express();
@@ -18,7 +17,16 @@ let DB_INIT = 0;
 
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.json());
-app.use(cors());
+
+// Set a Content-Security-Policy response header allowing images from the
+// configured API host (or the current host). This is preferable to a static
+// meta tag because it can be computed from environment/config at runtime.
+app.use((req, res, next) => {
+  const apiHost = process.env.IMG_API_URL || `${req.protocol}://${req.headers.host}`;
+  const csp = `default-src 'self'; img-src 'self' data: blob: ${apiHost}; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'`;
+  res.setHeader('Content-Security-Policy', csp);
+  next();
+});
 /* app.use((req, res) => {
   res.status(404);
   res.send("<h1>Error 404: Resource not found.</h1>");

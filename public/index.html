@@ -3,12 +3,15 @@
   <head>
     <title>Art display</title>
     <meta charset="utf-8" />
-    <link rel="stylesheet" href="styles.css" />
+    <!-- CSP is set by the server via response header to allow dynamic hosts and blob URLs -->
+    <link rel="stylesheet" href="/styles.css" />
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   </head>
   <body>
     <div id="img-container" class="container">
-      <img id="img-A" class="hidden" src="assets/a.jpg" />
-      <img id="img-B" class="hidden" src="assets/b.jpg" />
+      <img id="img-A" class="hidden" src="/assets/a.jpg" />
+      <img id="img-B" class="hidden" src="/assets/b.jpg" />
     </div>
     <div class="info-box">
       <span id="artist">Artist: </span>
@@ -21,6 +24,6 @@
       <br />
       <span id="file-id" class="file-id">ID: </span>
     </div>
-    <script src="main.js"></script>
+    <script src="/main.js"></script>
   </body>
 </html>
