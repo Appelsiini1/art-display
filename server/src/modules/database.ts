@@ -73,6 +73,11 @@ export async function initDbTables() {
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now()\
 );",
   );
+
+  await execQuery(
+    "INSERT INTO metadata (name, value)\
+    VALUES ('currentRating', 'sfw') \
+    ON CONFLICT (name) DO NOTHING;");
 }
 export async function getRandomDisplayFile(
   rating: "all" | string = "all",
