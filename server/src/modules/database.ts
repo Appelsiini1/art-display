@@ -59,7 +59,7 @@ export async function initDbTables() {
   await execQuery(
     "CREATE TABLE IF NOT EXISTS metadata (\
     id        UUID PRIMARY KEY DEFAULT gen_random_uuid(),\
-    name      TEXT,\
+    name      TEXT UNIQUE,\
     value     TEXT\
     );",
   );
