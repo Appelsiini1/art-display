@@ -1,0 +1,14 @@
+id: add-project-readme
+title: Add project README
+owner: ops
+created: 2026-08-31
+artifacts:
+  - id: proposal
+    type: proposal
+  - id: design
+    type: design
+  - id: tasks
+    type: tasks
+apply:
+  requires:
+    - tasks
