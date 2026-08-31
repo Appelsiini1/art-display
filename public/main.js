@@ -43,42 +43,130 @@ function revokeBlobURL(elementID) {
   }
 }
 
-async function getImage(elementID) {
+async function getImageInfo() {
   return new Promise((resolve, reject) => {
     fetch(new Request(apiURL + "/img/random"))
       .then(async (response) => {
         const resJson = await response.json();
-        switch (elementID) {
-          case "img-A":
-            imgInfoA = resJson;
-            break;
-          case "img-B":
-            imgInfoB = resJson;
-        }
-        return resJson;
-      })
-      .then((resJson) => {
-        fetch(new Request(apiURL + "/img/file?id=" + resJson.id.toString()))
-          .then((response) => response.blob())
-          .then((myBlob) => {
-            const objectURL = URL.createObjectURL(myBlob);
-            switch (elementID) {
-              case "img-A":
-                blobA = objectURL;
-                break;
-              case "img-B":
-                blobB = objectURL;
-            }
-            const imageElement = document.getElementById(elementID);
-            imageElement.onload = () => resolve(null);
-            imageElement.onerror = (error) => reject(error);
-            imageElement.src = objectURL;
-          });
+        resolve(resJson);
       })
       .catch((reason) => {
         console.error(reason);
         reject(reason);
       });
+  });
+}
+
+async function getImage(elementID) {
+  return new Promise((resolve, reject) => {
+    const MAX_ATTEMPTS = 6;
+    const THRESHOLD = 500; // px
+    // internal attempt-aware loader to allow retries for small images
+    function attemptLoad(attempt) {
+      getImageInfo()
+        .then(async (response) => {
+          const resJson = await response.json();
+          switch (elementID) {
+            case "img-A":
+              imgInfoA = resJson;
+              break;
+            case "img-B":
+              imgInfoB = resJson;
+          }
+          return resJson;
+        })
+        .then((resJson) => {
+          return fetch(new Request(apiURL + "/img/file?id=" + resJson.id.toString()));
+        })
+        .then((response) => response.blob())
+        .then((myBlob) => {
+          const objectURL = URL.createObjectURL(myBlob);
+          switch (elementID) {
+            case "img-A":
+              blobA = objectURL;
+              break;
+            case "img-B":
+              blobB = objectURL;
+          }
+          const imageElement = document.getElementById(elementID);
+
+          const onloadHandler = () => {
+            const w = imageElement.naturalWidth || 0;
+            const h = imageElement.naturalHeight || 0;
+            if (w < THRESHOLD && h < THRESHOLD) {
+              // too small: clean up and retry (unless we've exhausted attempts)
+              console.warn(
+                `Image ${elementID} too small (${w}x${h}), attempt ${attempt}`,
+              );
+              try {
+                URL.revokeObjectURL(objectURL);
+              } catch (e) {
+                /* ignore */
+              }
+              switch (elementID) {
+                case "img-A":
+                  blobA = null;
+                  break;
+                case "img-B":
+                  blobB = null;
+              }
+              if (attempt < MAX_ATTEMPTS) {
+                // slight delay to avoid tight loop
+                window.setTimeout(() => attemptLoad(attempt + 1), 100);
+                return;
+              } else {
+                // give up and resolve so UI can proceed
+                resolve(null);
+                return;
+              }
+            }
+
+            // good image
+            // call sizing/positioning now that natural sizes are available
+            try {
+              setImgDimensions(elementID);
+              setImgPosition(elementID);
+            } catch (e) {
+              /* ignore errors from layout */
+            }
+            // detach handlers
+            imageElement.onload = null;
+            imageElement.onerror = null;
+            resolve(null);
+          };
+
+          const onerrorHandler = (error) => {
+            console.error("image load error", error);
+            try {
+              URL.revokeObjectURL(objectURL);
+            } catch (e) {
+              /* ignore */
+            }
+            switch (elementID) {
+              case "img-A":
+                blobA = null;
+                break;
+              case "img-B":
+                blobB = null;
+            }
+            if (attempt < MAX_ATTEMPTS) {
+              window.setTimeout(() => attemptLoad(attempt + 1), 100);
+            } else {
+              reject(error);
+            }
+          };
+
+          imageElement.onload = onloadHandler;
+          imageElement.onerror = onerrorHandler;
+          imageElement.src = objectURL;
+        })
+        .catch((reason) => {
+          console.error(reason);
+          reject(reason);
+        });
+    }
+
+    attemptLoad(1);
   });
 }
 
