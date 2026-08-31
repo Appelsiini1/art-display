@@ -19,9 +19,16 @@ import {
   displayFileBatchWriter,
   displayFileDeleteWriter,
 } from "./db";
+import { inc } from "./metrics";
 
 export async function processOne(filePath: string, options: ScanOptions) {
   logMessage(`Processing file: ${filePath}`, "debug");
+  try {
+    inc("scanned");
+  } catch (e) {
+    // metrics should never throw
+    logMessage(`Metrics inc error: ${e}`, "warn");
+  }
   if (!isAccetableFileExtension(filePath)) {
     logMessage(
       `Skipping file '${path.basename(filePath)}' based on extension.`,
@@ -45,6 +52,8 @@ export async function processOne(filePath: string, options: ScanOptions) {
   const fingerprint = await computeFingerprint(filePath, stat); // pass stat in, avoid re-stat-ing
   if (prev && prev.hash === fingerprint.hash) {
     await fingerprintWriter.add({ path: filePath, ...fingerprint });
+    inc("fingerprints_updated");
+    inc("processed");
     return;
   }
 
@@ -69,6 +78,9 @@ export async function processOne(filePath: string, options: ScanOptions) {
     );
     await displayFileDeleteWriter.add(stripXmpExtension(filePath));
     await fingerprintWriter.add({ path: filePath, ...fingerprint });
+    inc("fingerprints_updated");
+    inc("display_deleted");
+    inc("processed");
     return;
   }
 
@@ -84,18 +96,24 @@ export async function processOne(filePath: string, options: ScanOptions) {
       "debug",
     );
     await displayFileBatchWriter.add(df);
+    inc("display_inserted");
+    if (df.nsfw) inc("nsfw_hits");
+    else inc("sfw_hits");
   } else {
     logMessage(
       `File '${filePath}' has no matching tags; purging any display_files row.`,
       "debug",
     );
     await displayFileDeleteWriter.add(stripXmpExtension(filePath));
+    inc("display_deleted");
   }
   logMessage(
     `File '${filePath}' is new, adding fingerprint to database.`,
     "debug",
   );
   await fingerprintWriter.add({ path: filePath, ...fingerprint });
+  inc("fingerprints_updated");
+  inc("processed");
   return;
 }
 

@@ -17,6 +17,7 @@ import {
   processFilesConcurrently,
   walkXmpFiles,
 } from "./modules/xmpProcess";
+import { startRun, finishAndPersist } from "./modules/metrics";
 
 async function reconcile(walked: Set<string>): Promise<void> {
   const dbPaths = await selectAllFingerprintPaths();
@@ -88,6 +89,11 @@ async function main() {
     let sweepAllowed = true;
     const walked = new Set<string>();
     try {
+      try {
+        startRun({ scanDir: dirArg });
+      } catch (err: any) {
+        logMessage(`Metrics startRun error: ${err && err.message ? err.message : err}`, "warn");
+      }
       if (!(await getDBStatus())) return;
       logMessage("Starting scan...", "info");
 
@@ -116,6 +122,12 @@ async function main() {
           `Batch flush error on close: ${err && err.stack ? err.stack : err}`,
           "error",
         );
+      }
+
+      try {
+        await finishAndPersist();
+      } catch (err: any) {
+        logMessage(`Metrics finish error: ${err && err.stack ? err.stack : err}`, "warn");
       }
 
       if (!sweepAllowed) {
