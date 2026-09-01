@@ -64,35 +64,22 @@ LOG_LEVEL="info"
 Then start the full stack with Docker Compose:
 
 ```bash
-docker-compose up --build
+docker compose up --build
 ```
 
 This builds and starts the server and scanner processes according to the repository configuration.
 
-## Development
-
-Each component has its own local workflow and docs:
-
-- [server/README.md](server/README.md) — API and backend behavior
-- [scanner/README.md](scanner/README.md) — ingestion and XMP processing
-- [public/README.md](public/README.md) — browser UI and static assets
-- [kiosk/README.md](kiosk/README.md) — kiosk launch and deployment notes
-
-For component-level work, prefer the component README and then the project docs index:
-
-- [docs/README.md](docs/README.md)
-
 ## Deployment
 
 - The app is designed to run with Docker Compose for local development and a kiosk deployment setup for display hardware.
-- `kiosk/README.md` covers the browser startup workflow and systemd service files.
+- [kiosk/README.md](kiosk/README.md)` covers the browser startup workflow and systemd service files.
 - The server and scanner each include their own Dockerfiles and package-level build scripts.
 
 ## Docs and further reading
 
 - [docs/README.md](docs/README.md) — component documentation index
 - [server/README.md](server/README.md) — backend API reference and notes
-- [scanner/README.md](scanner/README.md) — ingestion pipeline and metadata assumptions
-- [public/README.md](public/README.md) — frontend and browser UI behavior
+- [scanner/README.md](scanner/README.md) — ingestion pipeline and XMP processing
+- [public/README.md](public/README.md) — frontend and browser UI
 - [kiosk/README.md](kiosk/README.md) — kiosk setup and launch details
  
