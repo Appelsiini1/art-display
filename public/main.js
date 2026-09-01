@@ -6,7 +6,7 @@ const windowWidth = document.getElementById("img-container").clientWidth;
 const apiURL =
   window.location.protocol === "http:" || window.location.protocol === "https:"
     ? window.location.origin
-    : "http://localhost:9000";
+    : "http://localhost:54560";
 
 let blobA = null;
 let blobB = null;
