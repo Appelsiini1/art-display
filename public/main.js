@@ -65,15 +65,14 @@ async function getImage(elementID) {
     function attemptLoad(attempt) {
       getImageInfo()
         .then(async (response) => {
-          const resJson = await response.json();
           switch (elementID) {
             case "img-A":
-              imgInfoA = resJson;
+              imgInfoA = response;
               break;
             case "img-B":
-              imgInfoB = resJson;
+              imgInfoB = response;
           }
-          return resJson;
+          return response;
         })
         .then((resJson) => {
           return fetch(new Request(apiURL + "/img/file?id=" + resJson.id.toString()));
