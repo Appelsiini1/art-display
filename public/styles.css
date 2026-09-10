@@ -119,10 +119,13 @@ body {
 }
 
 img {
-  display: inline-block;
-  max-width: 100vw;
-  max-height: 100vh;
+  display: block;
   position: absolute;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  object-fit: contain;
+  object-position: center;
 }
 
 .hidden {

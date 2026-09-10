@@ -171,53 +171,19 @@ async function getImage(elementID) {
 
 function setImgDimensions(elementID) {
   const element = document.getElementById(elementID);
-  const height = element.naturalHeight;
-  const width = element.naturalWidth;
-  //console.log(`Height: ${element.naturalHeight}`);
-  //console.log(`Width: ${element.naturalHeight}`);
-  if (height < windowHeight && width < windowWidth) {
-    if (height > width) {
-      element.style.height = "100%";
-      element.style.width = "auto";
-      //element.height = window.screen.availHeight;
-      //element.removeAttribute("width");
-    } else {
-      element.style.width = "100%";
-      element.style.height = "auto";
-    }
-  } else {
-    element.style.height = "auto";
-    element.style.width = "auto";
-  }
+  element.style.width = "100vw";
+  element.style.height = "100vh";
+  element.style.objectFit = "contain";
+  element.style.objectPosition = "center";
+  element.style.left = "0";
+  element.style.top = "0";
 }
 
 function setImgPosition(elementID) {
   const element = document.getElementById(elementID);
-  const height = element.clientHeight;
-  const width = element.clientWidth;
-
-  const diffHeight = windowHeight - height;
-  const diffWidth = windowWidth - width;
-
-  if (diffHeight == 0) {
-    element.style.setProperty("top", "0px", "important");
-  } else if (diffHeight > 0) {
-    element.style.setProperty(
-      "top",
-      Math.floor(diffHeight / 2).toString() + "px",
-      "important",
-    );
-  }
-
-  if (diffWidth == 0) {
-    element.style.setProperty("left", "0px", "important");
-  } else if (diffWidth > 0) {
-    element.style.setProperty(
-      "left",
-      Math.floor(diffWidth / 2).toString() + "px",
-      "important",
-    );
-  }
+  element.style.left = "0";
+  element.style.top = "0";
+  element.style.transform = "none";
 }
 
 function setFileDetails(elementID) {
