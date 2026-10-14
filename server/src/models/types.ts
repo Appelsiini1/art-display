@@ -27,6 +27,41 @@ export interface ScanRunSummary {
   metadata: Record<string, any> | null;
 }
 
+export interface ImageServeEvent {
+  id: string;
+  served_at: string;
+  file_id: string;
+  file_path: string;
+  artist: string | null;
+  rating: "sfw" | "nsfw";
+}
+
+export interface TopFileStat {
+  file_id: string;
+  file_path: string;
+  serves: number;
+  sfw_serves: number;
+  nsfw_serves: number;
+}
+
+export interface TopArtistStat {
+  artist: string | null;
+  serves: number;
+  sfw_serves: number;
+  nsfw_serves: number;
+}
+
+export interface ImageServeSummary {
+  total_serves: number;
+  sfw_serves: number;
+  nsfw_serves: number;
+  sfw_pct: number;
+  nsfw_pct: number;
+  top_files: TopFileStat[];
+  top_artists: TopArtistStat[];
+  artist_breakdown: TopArtistStat[];
+}
+
 export type QueryConfig = {
   text: string;
   values: any[];

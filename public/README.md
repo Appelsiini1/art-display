@@ -17,6 +17,8 @@ The frontend polls the server API for random images and displays them as a slide
 
 The statistics page is a separate read-only dashboard that fetches recent scanner run history from `/statistics/run_history` and summarizes it by time window. This provides a clean place for current and future run metrics without disrupting the gallery experience.
 
+The project also exposes image-serving analytics through `/statistics/image_serves`. This summary endpoint reports aggregate usage for the random image endpoint, including total serves, SFW/NSFW splits, top files, and top artists. The artist values are historical snapshots captured at serve time so they remain meaningful even if files are later removed from the live catalog.
+
 The app expects the server to be running and reachable at the correct origin, usually via the same host and port combination used for the API endpoints.
 
 ## Development notes

@@ -4,11 +4,13 @@ import { query, validationResult } from "express-validator";
 import {
   allMetadataValues,
   getDisplayFileById,
+  getImageServeSummary,
   getMetadataValue,
   getRandomDisplayFile,
   getScanRunHistory,
   initDbTables,
   insertRow,
+  recordImageServeEvent,
   updateRow,
 } from "./modules/database";
 import { getFile, logMessage, transfromToDTO } from "./modules/util";
@@ -110,6 +112,42 @@ app.get("/statistics/run_history", async (req, res) => {
   }
 });
 
+app.get("/statistics/image_serves", async (req, res) => {
+  const hoursParam = req.query.hours?.toString();
+  const sinceParam = req.query.since?.toString();
+
+  if (hoursParam && sinceParam) {
+    res.status(400).send("Use either 'hours' or 'since', not both.");
+    return;
+  }
+
+  try {
+    let since: Date | undefined;
+
+    if (sinceParam) {
+      const parsedSince = new Date(sinceParam);
+      if (Number.isNaN(parsedSince.getTime())) {
+        res.status(400).send("Invalid 'since' timestamp.");
+        return;
+      }
+      since = parsedSince;
+    } else if (hoursParam) {
+      const hours = Number(hoursParam);
+      if (!Number.isFinite(hours) || hours <= 0) {
+        res.status(400).send("'hours' must be a positive number.");
+        return;
+      }
+      since = new Date(Date.now() - hours * 60 * 60 * 1000);
+    }
+
+    const summary = await getImageServeSummary(since);
+    res.status(200).json(summary);
+  } catch (err: any) {
+    res.status(500).send("Internal Server Error");
+    logMessage(err.message, "error");
+  }
+});
+
 //URL/img?id=value
 app.get("/img", query("id").trim().notEmpty(), async (req, res) => {
   const result = validationResult(req);
@@ -144,11 +182,12 @@ app.get("/img", query("id").trim().notEmpty(), async (req, res) => {
 app.get("/img/random", async (req, res) => {
   try {
     const rating = await getMetadataValue("currentRating");
+    const activeRating = rating ? rating.value : "sfw";
     const maxAttempts = 10;
     let attempts = 0;
     let imgInfo: any = undefined;
     while (attempts < maxAttempts) {
-      const candidate = await getRandomDisplayFile(rating ? rating.value : "sfw");
+      const candidate = await getRandomDisplayFile(activeRating);
       if (!candidate) {
         attempts += 1;
         continue;
@@ -166,6 +205,15 @@ app.get("/img/random", async (req, res) => {
       res.status(404).send("No valid images available.");
       return;
     }
+
+    const serveRating = imgInfo.nsfw ? "nsfw" : "sfw";
+    await recordImageServeEvent(
+      imgInfo.id,
+      imgInfo.path,
+      imgInfo.artist ?? null,
+      serveRating,
+    );
+
     logMessage(`Serving '${imgInfo.path}'`, "info");
     res.status(200).json(transfromToDTO(imgInfo));
   } catch (err: any) {

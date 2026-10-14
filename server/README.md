@@ -59,6 +59,7 @@ The server exposes endpoints for image retrieval, metadata management, and scann
 - `/metadata/get` and `/metadata/get/all` — metadata read endpoints
 - `/metadata` — metadata create/update endpoint
 - `/statistics/run_history` — return scanner run summaries from the `scan_runs` table
+- `/statistics/image_serves` — return image serve aggregates from the `image_serve_events` table
 
 ### `/statistics/run_history`
 
@@ -70,6 +71,29 @@ Query parameters:
 - `since` — fetch rows from a specific ISO timestamp onward (for example `?since=2026-10-01T00:00:00Z`)
 
 If no filter is supplied, the default window is the last 30 days. Results are ordered by newest run first.
+
+### `/statistics/image_serves`
+
+Returns aggregate image-serving analytics from the `image_serve_events` table. This table records each successful random-image serve and keeps a historical snapshot of the artist and rating at serve time.
+
+Query parameters:
+
+- `hours` — fetch summary data from the last N hours (for example `?hours=24`)
+- `since` — fetch summary data from a specific ISO timestamp onward
+
+The response includes summary totals and the percentage split for SFW versus NSFW usage, plus top-file and top-artist aggregates. The `artist` column is intentionally stored as a snapshot at the moment of the serve, not as a live lookup, because display rows can disappear after file deletion and historical analytics should remain accurate.
+
+## Image serve analytics schema
+
+The server creates an `image_serve_events` table at startup if it does not already exist. It records:
+
+- `served_at` — timestamp for the serve event
+- `file_id` — file identity for the served image
+- `file_path` — file path snapshot at the time of serving
+- `artist` — artist snapshot captured when the image was served
+- `rating` — current rating used for the selection (`sfw` or `nsfw`)
+
+This table is intended for aggregated operational reporting and is intentionally separate from the mutable `display_files` table.
 
 ## Related documentation
 
