@@ -3,7 +3,7 @@ Description=Chromium kiosk
 PartOf=graphical-session.target
 
 [Service]
-ExecStart=/home/lilith/kiosk.sh
+ExecStart=/path/to/kiosk.sh
 Type=forking
 Restart=on-failure
 RestartSec=15s

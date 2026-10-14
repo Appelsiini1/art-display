@@ -2,7 +2,7 @@
 
 Place kiosk.sh to home folder **AND REPLACE THE URL TO POINT TO YOUR SERVER** (or copy the 'public' folder onto the device and point Chrome to the index.html file)
 
-Place kiosk.service & xsession.target to `~/.config/systemd/user/`
+Place kiosk.service & xsession.target to `~/.config/systemd/user/`. **REPLACE THE PATH TO THE `kiosk.sh` FILE IN THE SERVICE FILE**
 
 Enable service:
 `systemctl --user enable kiosk`
