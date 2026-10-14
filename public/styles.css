@@ -213,6 +213,49 @@ body::-webkit-scrollbar-button {
   background: rgba(159, 216, 255, 0.08);
 }
 
+.stats-card-link {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-height: 180px;
+  padding: 1.3rem;
+  text-decoration: none;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.8rem;
+  color: #edf5ff;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.stats-card-link:hover {
+  border-color: rgba(159, 216, 255, 0.7);
+  transform: translateY(-1px);
+}
+
+.stats-card-link-label {
+  color: #9fd8ff;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.stats-card-link strong {
+  font-size: 1.35rem;
+  color: #f4f4f4;
+}
+
+.stats-card-link small {
+  color: #c9d9f1;
+  line-height: 1.5;
+  opacity: 0.9;
+}
+
+.stats-landing-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+}
+
 .stats-header-actions {
   display: flex;
   gap: 0.75rem;

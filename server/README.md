@@ -58,6 +58,9 @@ The server exposes endpoints for image retrieval, metadata management, and scann
 - `/img/file` — serve the raw image file
 - `/metadata/get` and `/metadata/get/all` — metadata read endpoints
 - `/metadata` — metadata create/update endpoint
+- `/statistics` — statistics landing page with links to domain-specific dashboards
+- `/statistics/scan-runs` — scanner run history dashboard
+- `/statistics/image-serves` — image serve analytics dashboard
 - `/statistics/run_history` — return scanner run summaries from the `scan_runs` table
 - `/statistics/image_serves` — return image serve aggregates from the `image_serve_events` table
 

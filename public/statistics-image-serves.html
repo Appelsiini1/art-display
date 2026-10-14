@@ -1,0 +1,100 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Image Serve Statistics</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="/styles.css" />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  </head>
+  <body class="stats-page">
+    <main class="stats-container">
+      <header class="stats-header">
+        <div>
+          <p class="eyebrow">Operational overview</p>
+          <h1>Image Serve Statistics</h1>
+        </div>
+        <div class="stats-header-actions">
+          <a class="stats-link" href="/statistics">Statistics</a>
+          <a class="stats-link secondary" href="/statistics/scan-runs">Scan runs</a>
+          <a class="stats-link secondary" href="/settings.html">Settings</a>
+        </div>
+      </header>
+
+      <section class="stats-toolbar">
+        <label for="range-select">Time range</label>
+        <select id="range-select" aria-label="Select time range">
+          <option value="24">Last 24 hours</option>
+          <option value="168" selected>Last 7 days</option>
+          <option value="720">Last 30 days</option>
+          <option value="2160">Last 90 days</option>
+        </select>
+      </section>
+
+      <div id="status-message" class="status-message" aria-live="polite"></div>
+
+      <section class="stats-grid" aria-label="Image serve summary metrics">
+        <article class="stat-card">
+          <span class="stat-label">Total serves</span>
+          <strong id="stat-total" class="stat-value">0</strong>
+        </article>
+        <article class="stat-card">
+          <span class="stat-label">SFW serves</span>
+          <strong id="stat-sfw" class="stat-value">0</strong>
+        </article>
+        <article class="stat-card">
+          <span class="stat-label">NSFW serves</span>
+          <strong id="stat-nsfw" class="stat-value">0</strong>
+        </article>
+        <article class="stat-card">
+          <span class="stat-label">SFW share</span>
+          <strong id="stat-sfw-pct" class="stat-value">0%</strong>
+        </article>
+        <article class="stat-card">
+          <span class="stat-label">NSFW share</span>
+          <strong id="stat-nsfw-pct" class="stat-value">0%</strong>
+        </article>
+      </section>
+
+      <section class="stats-panel">
+        <div class="panel-header">
+          <h2>Top served files</h2>
+        </div>
+        <div class="table-wrap">
+          <table class="history-table">
+            <thead>
+              <tr>
+                <th>File</th>
+                <th>Serves</th>
+                <th>SFW</th>
+                <th>NSFW</th>
+              </tr>
+            </thead>
+            <tbody id="top-files-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="stats-panel">
+        <div class="panel-header">
+          <h2>Top artists</h2>
+        </div>
+        <div class="table-wrap">
+          <table class="history-table">
+            <thead>
+              <tr>
+                <th>Artist</th>
+                <th>Serves</th>
+                <th>SFW</th>
+                <th>NSFW</th>
+              </tr>
+            </thead>
+            <tbody id="top-artists-body"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <script src="/statistics-image-serves.js"></script>
+  </body>
+</html>

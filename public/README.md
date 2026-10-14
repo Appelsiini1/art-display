@@ -7,7 +7,9 @@ The `public/` directory contains the browser-facing assets used by the kiosk and
 - `index.html` — main gallery page
 - `main.js` — image loading, rotation, and metadata update logic
 - `settings.html` and `settings.js` — UI for user settings and metadata adjustments
-- `statistics.html` and `statistics.js` — operational dashboard for recent scan history and summary metrics
+- `statistics.html` — landing page for the statistics area
+- `statistics-scan-runs.html` and `statistics-scan-runs.js` — scanner run history dashboard
+- `statistics-image-serves.html` and `statistics-image-serves.js` — image-serving summary dashboard
 - `styles.css` — presentation styling shared by the static pages
 - `assets/` — local image assets and browser references
 
@@ -15,9 +17,9 @@ The `public/` directory contains the browser-facing assets used by the kiosk and
 
 The frontend polls the server API for random images and displays them as a slideshow. It also updates the current metadata shown in the browser, such as artist, file name, rating, and dimensions.
 
-The statistics page is a separate read-only dashboard that fetches recent scanner run history from `/statistics/run_history` and summarizes it by time window. This provides a clean place for current and future run metrics without disrupting the gallery experience.
+The statistics area now has a small landing page at `/statistics` that links to dedicated dashboards for each operational domain. The scanner-run page is available at `/statistics/scan-runs` and fetches recent scanner run history from `/statistics/run_history`, while the image-serve dashboard lives at `/statistics/image-serves` and reads aggregate data from `/statistics/image_serves`.
 
-The project also exposes image-serving analytics through `/statistics/image_serves`. This summary endpoint reports aggregate usage for the random image endpoint, including total serves, SFW/NSFW splits, top files, and top artists. The artist values are historical snapshots captured at serve time so they remain meaningful even if files are later removed from the live catalog.
+This structure keeps the gallery experience clean while making it easier to expand the analytics surface over time. The image-serving summary reports total serves, SFW/NSFW splits, top files, and top artists, and the artist values are historical snapshots captured at serve time so they remain meaningful even if files are later removed from the live catalog.
 
 The app expects the server to be running and reachable at the correct origin, usually via the same host and port combination used for the API endpoints.
 
