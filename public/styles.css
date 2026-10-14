@@ -286,7 +286,7 @@ body::-webkit-scrollbar-button {
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 1rem;
 }
 
@@ -298,6 +298,9 @@ body::-webkit-scrollbar-button {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .stat-card.wide {
@@ -313,6 +316,10 @@ body::-webkit-scrollbar-button {
 
 .stat-value {
   font-size: clamp(1.5rem, 2vw, 2.1rem);
+  line-height: 1.15;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .stats-panel,
