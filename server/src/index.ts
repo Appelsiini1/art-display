@@ -77,19 +77,19 @@ app.get("/status", async (req, res) => {
 });
 
 app.get("/statistics", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "statistics.html"));
+  res.sendFile(path.join(__dirname, "public", "statistics", "index.html"));
 });
 
 app.get("/statistics.html", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "statistics.html"));
+  res.sendFile(path.join(__dirname, "public", "statistics", "index.html"));
 });
 
 app.get("/statistics/scan-runs", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "statistics-scan-runs.html"));
+  res.sendFile(path.join(__dirname, "public", "statistics", "scan-runs.html"));
 });
 
 app.get("/statistics/image-serves", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "statistics-image-serves.html"));
+  res.sendFile(path.join(__dirname, "public", "statistics", "image-serves.html"));
 });
 
 app.get("/statistics/run_history", async (req, res) => {

@@ -1,22 +1,22 @@
 <!doctype html>
 <html>
   <head>
-    <title>Scanner Run Statistics</title>
+    <title>Image Serve Statistics</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="/styles.css" />
-    <link rel="icon" href="/favicon.ico" sizes="any" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/assets/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
   </head>
   <body class="stats-page">
     <main class="stats-container">
       <header class="stats-header">
         <div>
           <p class="eyebrow">Operational overview</p>
-          <h1>Scanner Run Statistics</h1>
+          <h1>Image Serve Statistics</h1>
         </div>
         <div class="stats-header-actions">
           <a class="stats-link" href="/statistics">Statistics</a>
-          <a class="stats-link secondary" href="/statistics/image-serves">Image serves</a>
+          <a class="stats-link secondary" href="/statistics/scan-runs">Scan runs</a>
           <a class="stats-link secondary" href="/settings.html">Settings</a>
         </div>
       </header>
@@ -33,62 +33,68 @@
 
       <div id="status-message" class="status-message" aria-live="polite"></div>
 
-      <section class="stats-grid" aria-label="Summary metrics">
+      <section class="stats-grid" aria-label="Image serve summary metrics">
         <article class="stat-card">
-          <span class="stat-label">Total runs</span>
-          <strong id="stat-runs" class="stat-value">0</strong>
+          <span class="stat-label">Total serves</span>
+          <strong id="stat-total" class="stat-value">0</strong>
         </article>
         <article class="stat-card">
-          <span class="stat-label">Scanned</span>
-          <strong id="stat-scanned" class="stat-value">0</strong>
-        </article>
-        <article class="stat-card">
-          <span class="stat-label">Processed</span>
-          <strong id="stat-processed" class="stat-value">0</strong>
-        </article>
-        <article class="stat-card">
-          <span class="stat-label">NSFW hits</span>
-          <strong id="stat-nsfw" class="stat-value">0</strong>
-        </article>
-        <article class="stat-card">
-          <span class="stat-label">SFW hits</span>
+          <span class="stat-label">SFW serves</span>
           <strong id="stat-sfw" class="stat-value">0</strong>
         </article>
         <article class="stat-card">
-          <span class="stat-label">Errors</span>
-          <strong id="stat-errors" class="stat-value">0</strong>
+          <span class="stat-label">NSFW serves</span>
+          <strong id="stat-nsfw" class="stat-value">0</strong>
         </article>
-        <article class="stat-card wide">
-          <span class="stat-label">Avg duration</span>
-          <strong id="stat-duration" class="stat-value">0s</strong>
+        <article class="stat-card">
+          <span class="stat-label">SFW share</span>
+          <strong id="stat-sfw-pct" class="stat-value">0%</strong>
+        </article>
+        <article class="stat-card">
+          <span class="stat-label">NSFW share</span>
+          <strong id="stat-nsfw-pct" class="stat-value">0%</strong>
         </article>
       </section>
 
       <section class="stats-panel">
         <div class="panel-header">
-          <h2>Recent run history</h2>
+          <h2>Top served files</h2>
         </div>
-
         <div class="table-wrap">
           <table class="history-table">
             <thead>
               <tr>
-                <th>Started</th>
-                <th>Finished</th>
-                <th>Duration</th>
-                <th>Scanned</th>
-                <th>Processed</th>
-                <th>NSFW</th>
+                <th>File</th>
+                <th>Serves</th>
                 <th>SFW</th>
-                <th>Errors</th>
+                <th>NSFW</th>
               </tr>
             </thead>
-            <tbody id="history-table-body"></tbody>
+            <tbody id="top-files-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="stats-panel">
+        <div class="panel-header">
+          <h2>Top artists</h2>
+        </div>
+        <div class="table-wrap">
+          <table class="history-table">
+            <thead>
+              <tr>
+                <th>Artist</th>
+                <th>Serves</th>
+                <th>SFW</th>
+                <th>NSFW</th>
+              </tr>
+            </thead>
+            <tbody id="top-artists-body"></tbody>
           </table>
         </div>
       </section>
     </main>
 
-    <script src="/statistics-scan-runs.js"></script>
+    <script src="/statistics/image-serves.js"></script>
   </body>
 </html>

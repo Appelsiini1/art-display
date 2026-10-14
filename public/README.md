@@ -7,9 +7,9 @@ The `public/` directory contains the browser-facing assets used by the kiosk and
 - `index.html` — main gallery page
 - `main.js` — image loading, rotation, and metadata update logic
 - `settings.html` and `settings.js` — UI for user settings and metadata adjustments
-- `statistics.html` — landing page for the statistics area
-- `statistics-scan-runs.html` and `statistics-scan-runs.js` — scanner run history dashboard
-- `statistics-image-serves.html` and `statistics-image-serves.js` — image-serving summary dashboard
+- `statistics/index.html` — landing page for the statistics area
+- `statistics/scan-runs.html` and `statistics/scan-runs.js` — scanner run history dashboard
+- `statistics/image-serves.html` and `statistics/image-serves.js` — image-serving summary dashboard
 - `styles.css` — presentation styling shared by the static pages
 - `assets/` — local image assets and browser references
 
