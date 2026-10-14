@@ -7,12 +7,15 @@ The `public/` directory contains the browser-facing assets used by the kiosk and
 - `index.html` — main gallery page
 - `main.js` — image loading, rotation, and metadata update logic
 - `settings.html` and `settings.js` — UI for user settings and metadata adjustments
-- `styles.css` — presentation styling
+- `statistics.html` and `statistics.js` — operational dashboard for recent scan history and summary metrics
+- `styles.css` — presentation styling shared by the static pages
 - `assets/` — local image assets and browser references
 
 ## How it works
 
 The frontend polls the server API for random images and displays them as a slideshow. It also updates the current metadata shown in the browser, such as artist, file name, rating, and dimensions.
+
+The statistics page is a separate read-only dashboard that fetches recent scanner run history from `/statistics/run_history` and summarizes it by time window. This provides a clean place for current and future run metrics without disrupting the gallery experience.
 
 The app expects the server to be running and reachable at the correct origin, usually via the same host and port combination used for the API endpoints.
 
