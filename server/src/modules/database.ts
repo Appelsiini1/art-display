@@ -1,5 +1,10 @@
 import { Pool, QueryResult } from "pg";
-import { DisplayFile, MetadataRow, QueryConfig } from "../models/types";
+import {
+  DisplayFile,
+  MetadataRow,
+  QueryConfig,
+  ScanRunSummary,
+} from "../models/types";
 import { logMessage } from "./util";
 
 const dbContext: { pool: null | Pool } = {
@@ -168,6 +173,45 @@ export async function allMetadataValues(): Promise<MetadataRow[]> {
   const result = await execQuery(query);
   if (!result) return [];
   return result.rows;
+}
+
+export async function getScanRunHistory(
+  since?: Date | string,
+): Promise<ScanRunSummary[]> {
+  const cutoff = since
+    ? new Date(since)
+    : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+
+  if (Number.isNaN(cutoff.getTime())) {
+    throw new Error("Invalid scan history time window.");
+  }
+
+  const query = {
+    text: `
+      SELECT
+        id,
+        started_at,
+        finished_at,
+        scanned,
+        processed,
+        fingerprints_updated,
+        display_inserted,
+        display_deleted,
+        errors,
+        nsfw_hits,
+        sfw_hits,
+        duration_ms,
+        metadata
+      FROM scan_runs
+      WHERE started_at >= $1
+      ORDER BY started_at DESC
+    `,
+    values: [cutoff.toISOString()],
+  };
+
+  const result = await execQuery(query);
+  if (!result) return [];
+  return result.rows as ScanRunSummary[];
 }
 
 export async function insertRow<T extends Record<string, any>>(

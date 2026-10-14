@@ -50,7 +50,7 @@ IMG_API_URL=http://localhost:9000
 
 ## API notes
 
-The server exposes endpoints for image retrieval and metadata management, including:
+The server exposes endpoints for image retrieval, metadata management, and scanner statistics, including:
 
 - `/status` — readiness endpoint
 - `/img/random` — fetch a random display image
@@ -58,6 +58,18 @@ The server exposes endpoints for image retrieval and metadata management, includ
 - `/img/file` — serve the raw image file
 - `/metadata/get` and `/metadata/get/all` — metadata read endpoints
 - `/metadata` — metadata create/update endpoint
+- `/statistics/run_history` — return scanner run summaries from the `scan_runs` table
+
+### `/statistics/run_history`
+
+Returns recent scanner run history as JSON. The endpoint is read-only and uses the `scan_runs` table persisted by the scanner.
+
+Query parameters:
+
+- `hours` — fetch rows from the last N hours (for example `?hours=24`)
+- `since` — fetch rows from a specific ISO timestamp onward (for example `?since=2026-10-01T00:00:00Z`)
+
+If no filter is supplied, the default window is the last 30 days. Results are ordered by newest run first.
 
 ## Related documentation
 

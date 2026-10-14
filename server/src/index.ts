@@ -6,6 +6,7 @@ import {
   getDisplayFileById,
   getMetadataValue,
   getRandomDisplayFile,
+  getScanRunHistory,
   initDbTables,
   insertRow,
   updateRow,
@@ -70,6 +71,42 @@ app.get("/status", async (req, res) => {
     res.status(200).send({ ready: true });
   } else {
     res.status(200).send({ ready: false });
+  }
+});
+
+app.get("/statistics/run_history", async (req, res) => {
+  const hoursParam = req.query.hours?.toString();
+  const sinceParam = req.query.since?.toString();
+
+  if (hoursParam && sinceParam) {
+    res.status(400).send("Use either 'hours' or 'since', not both.");
+    return;
+  }
+
+  try {
+    let since: Date | undefined;
+
+    if (sinceParam) {
+      const parsedSince = new Date(sinceParam);
+      if (Number.isNaN(parsedSince.getTime())) {
+        res.status(400).send("Invalid 'since' timestamp.");
+        return;
+      }
+      since = parsedSince;
+    } else if (hoursParam) {
+      const hours = Number(hoursParam);
+      if (!Number.isFinite(hours) || hours <= 0) {
+        res.status(400).send("'hours' must be a positive number.");
+        return;
+      }
+      since = new Date(Date.now() - hours * 60 * 60 * 1000);
+    }
+
+    const history = await getScanRunHistory(since);
+    res.status(200).json(history);
+  } catch (err: any) {
+    res.status(500).send("Internal Server Error");
+    logMessage(err.message, "error");
   }
 });
 
