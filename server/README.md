@@ -52,19 +52,19 @@ IMG_API_URL=http://localhost:9000
 
 The server exposes endpoints for image retrieval, metadata management, and scanner statistics, including:
 
-- `/status` — readiness endpoint
-- `/img/random` — fetch a random display image
-- `/img` — fetch a specific image by ID
-- `/img/file` — serve the raw image file
-- `/metadata/get` and `/metadata/get/all` — metadata read endpoints
-- `/metadata` — metadata create/update endpoint
+- `/api/status` — readiness endpoint
+- `/api/img/random` — fetch a random display image
+- `/api/img` — fetch a specific image by ID
+- `/api/img/file` — serve the raw image file
+- `/api/metadata/get` and `/api/metadata/get/all` — metadata read endpoints
+- `/api/metadata` — metadata create/update endpoint
 - `/statistics` — statistics landing page with links to domain-specific dashboards
 - `/statistics/scan-runs` — scanner run history dashboard
 - `/statistics/image-serves` — image serve analytics dashboard
-- `/statistics/run_history` — return scanner run summaries from the `scan_runs` table
-- `/statistics/image_serves` — return image serve aggregates from the `image_serve_events` table
+- `/api/statistics/run_history` — return scanner run summaries from the `scan_runs` table
+- `/api/statistics/image_serves` — return image serve aggregates from the `image_serve_events` table
 
-### `/statistics/run_history`
+### `/api/statistics/run_history`
 
 Returns recent scanner run history as JSON. The endpoint is read-only and uses the `scan_runs` table persisted by the scanner.
 
@@ -75,7 +75,7 @@ Query parameters:
 
 If no filter is supplied, the default window is the last 30 days. Results are ordered by newest run first.
 
-### `/statistics/image_serves`
+### `/api/statistics/image_serves`
 
 Returns aggregate image-serving analytics from the `image_serve_events` table. This table records each successful random-image serve and keeps a historical snapshot of the artist and rating at serve time.
 

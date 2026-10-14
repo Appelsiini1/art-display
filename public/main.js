@@ -45,7 +45,7 @@ function revokeBlobURL(elementID) {
 
 async function getImageInfo() {
   return new Promise((resolve, reject) => {
-    fetch(new Request(apiURL + "/img/random"))
+    fetch(new Request(apiURL + "/api/img/random"))
       .then(async (response) => {
         const resJson = await response.json();
         resolve(resJson);
@@ -75,7 +75,7 @@ async function getImage(elementID) {
           return response;
         })
         .then((resJson) => {
-          return fetch(new Request(apiURL + "/img/file?id=" + resJson.id.toString()));
+          return fetch(new Request(apiURL + "/api/img/file?id=" + resJson.id.toString()));
         })
         .then((response) => response.blob())
         .then((myBlob) => {

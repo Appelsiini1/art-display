@@ -46,7 +46,7 @@ async function saveCurrentRating(rating) {
 
   try {
     const response = await fetch(
-      `${apiBaseUrl}/metadata?name=${encodeURIComponent(CURRENT_RATING_KEY)}&value=${encodeURIComponent(
+      `${apiBaseUrl}/api/metadata?name=${encodeURIComponent(CURRENT_RATING_KEY)}&value=${encodeURIComponent(
         rating,
       )}`,
       { method: "POST" },
@@ -70,7 +70,7 @@ async function fetchCurrentRating() {
 
   try {
     const response = await fetch(
-      `${apiBaseUrl}/metadata/get?name=${encodeURIComponent(CURRENT_RATING_KEY)}`,
+      `${apiBaseUrl}/api/metadata/get?name=${encodeURIComponent(CURRENT_RATING_KEY)}`,
     );
 
     if (!response.ok) {
@@ -102,7 +102,7 @@ async function fetchMetadataList() {
   setStatus("Loading metadata values...");
 
   try {
-    const response = await fetch(`${apiBaseUrl}/metadata/get/all`);
+    const response = await fetch(`${apiBaseUrl}/api/metadata/get/all`);
     if (!response.ok) {
       throw new Error(`Server responded ${response.status}`);
     }
@@ -153,7 +153,7 @@ async function loadMetadataValue() {
 
   setStatus("Loading metadata value...");
   try {
-    const response = await fetch(`${apiBaseUrl}/metadata/get?name=${encodeURIComponent(key)}`);
+    const response = await fetch(`${apiBaseUrl}/api/metadata/get?name=${encodeURIComponent(key)}`);
     if (!response.ok) {
       if (response.status === 404) {
         setStatus(`Metadata key '${key}' not found.`, true);
@@ -182,7 +182,7 @@ async function saveMetadataValue() {
   setStatus("Saving metadata value...");
   try {
     const response = await fetch(
-      `${apiBaseUrl}/metadata?name=${encodeURIComponent(key)}&value=${encodeURIComponent(value)}`,
+      `${apiBaseUrl}/api/metadata?name=${encodeURIComponent(key)}&value=${encodeURIComponent(value)}`,
       { method: "POST" },
     );
 

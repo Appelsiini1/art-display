@@ -124,7 +124,7 @@ async function fetchHistory(hours) {
   setStatus("Loading scan history...");
 
   try {
-    const response = await fetch(`${apiBaseUrl}/statistics/run_history?hours=${encodeURIComponent(hours)}`);
+    const response = await fetch(`${apiBaseUrl}/api/statistics/run_history?hours=${encodeURIComponent(hours)}`);
 
     if (!response.ok) {
       throw new Error(`Server responded ${response.status}`);

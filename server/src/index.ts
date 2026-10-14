@@ -40,8 +40,8 @@ initDbTables().then(() => {
   });
 });
 
-//URL/img/file?id=value
-app.get("/img/file", query("id").trim().notEmpty(), async (req, res) => {
+//URL/api/img/file?id=value
+app.get("/api/img/file", query("id").trim().notEmpty(), async (req, res) => {
   const result = validationResult(req);
   try {
     if (result.isEmpty()) {
@@ -68,7 +68,7 @@ app.get("/img/file", query("id").trim().notEmpty(), async (req, res) => {
     logMessage(err.message, "error");
   }
 });
-app.get("/status", async (req, res) => {
+app.get("/api/status", async (req, res) => {
   if (DB_INIT === 1) {
     res.status(200).send({ ready: true });
   } else {
@@ -92,7 +92,7 @@ app.get("/statistics/image-serves", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "statistics", "image-serves.html"));
 });
 
-app.get("/statistics/run_history", async (req, res) => {
+app.get("/api/statistics/run_history", async (req, res) => {
   const hoursParam = req.query.hours?.toString();
   const sinceParam = req.query.since?.toString();
 
@@ -128,7 +128,7 @@ app.get("/statistics/run_history", async (req, res) => {
   }
 });
 
-app.get("/statistics/image_serves", async (req, res) => {
+app.get("/api/statistics/image_serves", async (req, res) => {
   const hoursParam = req.query.hours?.toString();
   const sinceParam = req.query.since?.toString();
 
@@ -164,8 +164,8 @@ app.get("/statistics/image_serves", async (req, res) => {
   }
 });
 
-//URL/img?id=value
-app.get("/img", query("id").trim().notEmpty(), async (req, res) => {
+//URL/api/img?id=value
+app.get("/api/img", query("id").trim().notEmpty(), async (req, res) => {
   const result = validationResult(req);
   try {
     if (result.isEmpty()) {
@@ -195,7 +195,7 @@ app.get("/img", query("id").trim().notEmpty(), async (req, res) => {
   }
 });
 
-app.get("/img/random", async (req, res) => {
+app.get("/api/img/random", async (req, res) => {
   try {
     const rating = await getMetadataValue("currentRating");
     const activeRating = rating ? rating.value : "sfw";
@@ -238,8 +238,8 @@ app.get("/img/random", async (req, res) => {
   }
 });
 
-//URL/metadata?name=value
-app.post("/metadata", async (req, res) => {
+//URL/api/metadata?name=value
+app.post("/api/metadata", async (req, res) => {
   const valueID = req.query.name?.toString();
   const value = req.query.value?.toString();
 
@@ -270,8 +270,8 @@ app.post("/metadata", async (req, res) => {
   }
 });
 
-//URL/metadata/get?name=value
-app.get("/metadata/get", query("name").trim().notEmpty(), async (req, res) => {
+//URL/api/metadata/get?name=value
+app.get("/api/metadata/get", query("name").trim().notEmpty(), async (req, res) => {
   const result = validationResult(req);
   if (result.isEmpty()) {
     try {
@@ -286,8 +286,8 @@ app.get("/metadata/get", query("name").trim().notEmpty(), async (req, res) => {
   }
 });
 
-//URL/metadata/get/all
-app.get("/metadata/get/all", async (req, res) => {
+//URL/api/metadata/get/all
+app.get("/api/metadata/get/all", async (req, res) => {
   try {
     const result = await allMetadataValues();
     logMessage(`Serving all metadata values. Count: ${result.length}`, "info");

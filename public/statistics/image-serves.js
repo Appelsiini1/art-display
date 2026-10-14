@@ -64,7 +64,7 @@ async function fetchSummary(hours) {
   setStatus("Loading image serve statistics...");
 
   try {
-    const response = await fetch(`${apiBaseUrl}/statistics/image_serves?hours=${encodeURIComponent(hours)}`);
+    const response = await fetch(`${apiBaseUrl}/api/statistics/image_serves?hours=${encodeURIComponent(hours)}`);
 
     if (!response.ok) {
       throw new Error(`Server responded ${response.status}`);

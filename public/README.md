@@ -17,7 +17,7 @@ The `public/` directory contains the browser-facing assets used by the kiosk and
 
 The frontend polls the server API for random images and displays them as a slideshow. It also updates the current metadata shown in the browser, such as artist, file name, rating, and dimensions.
 
-The statistics area now has a small landing page at `/statistics` that links to dedicated dashboards for each operational domain. The scanner-run page is available at `/statistics/scan-runs` and fetches recent scanner run history from `/statistics/run_history`, while the image-serve dashboard lives at `/statistics/image-serves` and reads aggregate data from `/statistics/image_serves`.
+The statistics area now has a small landing page at `/statistics` that links to dedicated dashboards for each operational domain. The scanner-run page is available at `/statistics/scan-runs` and fetches recent scanner run history from `/api/statistics/run_history`, while the image-serve dashboard lives at `/statistics/image-serves` and reads aggregate data from `/api/statistics/image_serves`.
 
 This structure keeps the gallery experience clean while making it easier to expand the analytics surface over time. The image-serving summary reports total serves, SFW/NSFW splits, top files, and top artists, and the artist values are historical snapshots captured at serve time so they remain meaningful even if files are later removed from the live catalog.
 

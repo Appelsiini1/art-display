@@ -140,7 +140,7 @@ export function extractArtist(filePath: string) {
 
 export function getDBStatus(): Promise<Boolean> {
   return new Promise((resolve, reject) => {
-    fetch(new Request("http://api:9000/status"))
+    fetch(new Request("http://api:9000/api/status"))
       .then(async (response) => {
         const resJson = await response.json();
         resolve(resJson.ready ? true : false);
