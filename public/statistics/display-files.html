@@ -1,0 +1,89 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Display File Statistics</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="/styles.css" />
+    <link rel="icon" href="/assets/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
+  </head>
+  <body class="stats-page">
+    <main class="stats-container">
+      <header class="stats-header">
+        <div>
+          <p class="eyebrow">Operational overview</p>
+          <h1>Display File Statistics</h1>
+        </div>
+        <div class="stats-header-actions">
+          <a class="stats-link" href="/statistics">Statistics</a>
+          <a class="stats-link secondary" href="/statistics/scan-runs">Scan runs</a>
+          <a class="stats-link secondary" href="/statistics/image-serves">Image serves</a>
+          <a class="stats-link secondary" href="/settings.html">Settings</a>
+        </div>
+      </header>
+
+      <div id="status-message" class="status-message" aria-live="polite"></div>
+
+      <section class="stats-grid" aria-label="Current catalog summary metrics">
+        <article class="stat-card">
+          <span class="stat-label">Total files</span>
+          <strong id="stat-total-files" class="stat-value">0</strong>
+        </article>
+        <article class="stat-card">
+          <span class="stat-label">Total artists</span>
+          <strong id="stat-total-artists" class="stat-value">0</strong>
+        </article>
+        <article class="stat-card">
+          <span class="stat-label">SFW files</span>
+          <strong id="stat-sfw-files" class="stat-value">0</strong>
+        </article>
+        <article class="stat-card">
+          <span class="stat-label">NSFW files</span>
+          <strong id="stat-nsfw-files" class="stat-value">0</strong>
+        </article>
+        <article class="stat-card">
+          <span class="stat-label">SFW share</span>
+          <strong id="stat-sfw-pct" class="stat-value">0%</strong>
+        </article>
+        <article class="stat-card">
+          <span class="stat-label">NSFW share</span>
+          <strong id="stat-nsfw-pct" class="stat-value">0%</strong>
+        </article>
+        <article class="stat-card">
+          <span class="stat-label">Avg files / artist</span>
+          <strong id="stat-avg-files" class="stat-value">0</strong>
+        </article>
+        <article class="stat-card">
+          <span class="stat-label">Median files / artist</span>
+          <strong id="stat-median-files" class="stat-value">0</strong>
+        </article>
+        <article class="stat-card wide">
+          <span class="stat-label">Concentration ratio</span>
+          <strong id="stat-concentration-ratio" class="stat-value">0</strong>
+        </article>
+      </section>
+
+      <section class="stats-panel">
+        <div class="panel-header">
+          <h2>Top artists by inventory share</h2>
+        </div>
+        <div class="table-wrap">
+          <table class="history-table">
+            <thead>
+              <tr>
+                <th>Artist</th>
+                <th>Files</th>
+                <th>SFW</th>
+                <th>NSFW</th>
+                <th>Share</th>
+              </tr>
+            </thead>
+            <tbody id="top-artists-body"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <script src="/statistics/display-files.js"></script>
+  </body>
+</html>

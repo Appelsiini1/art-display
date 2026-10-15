@@ -4,6 +4,7 @@ import { query, validationResult } from "express-validator";
 import {
   allMetadataValues,
   getDisplayFileById,
+  getDisplayFileSummary,
   getImageServeSummary,
   getMetadataValue,
   getRandomDisplayFile,
@@ -88,6 +89,10 @@ app.get("/statistics/scan-runs", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "statistics", "scan-runs.html"));
 });
 
+app.get("/statistics/display-files", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "statistics", "display-files.html"));
+});
+
 app.get("/statistics/image-serves", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "statistics", "image-serves.html"));
 });
@@ -122,6 +127,16 @@ app.get("/api/statistics/run_history", async (req, res) => {
 
     const history = await getScanRunHistory(since);
     res.status(200).json(history);
+  } catch (err: any) {
+    res.status(500).send("Internal Server Error");
+    logMessage(err.message, "error");
+  }
+});
+
+app.get("/api/statistics/display_files", async (req, res) => {
+  try {
+    const summary = await getDisplayFileSummary();
+    res.status(200).json(summary);
   } catch (err: any) {
     res.status(500).send("Internal Server Error");
     logMessage(err.message, "error");

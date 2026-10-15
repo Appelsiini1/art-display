@@ -51,6 +51,28 @@ export interface TopArtistStat {
   nsfw_serves: number;
 }
 
+export interface ArtistInventoryStat {
+  artist: string | null;
+  total_files: number;
+  sfw_files: number;
+  nsfw_files: number;
+  share_pct: number;
+}
+
+export interface DisplayFileSummary {
+  total_files: number;
+  total_artists: number;
+  sfw_files: number;
+  nsfw_files: number;
+  sfw_pct: number;
+  nsfw_pct: number;
+  avg_files_per_artist: number;
+  median_files_per_artist: number;
+  concentration_ratio: number;
+  top_artists: ArtistInventoryStat[];
+  artist_breakdown: ArtistInventoryStat[];
+}
+
 export interface ImageServeSummary {
   total_serves: number;
   sfw_serves: number;

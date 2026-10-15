@@ -1,6 +1,7 @@
 import { Pool, QueryResult } from "pg";
 import {
   DisplayFile,
+  DisplayFileSummary,
   ImageServeSummary,
   MetadataRow,
   QueryConfig,
@@ -200,6 +201,81 @@ export async function allMetadataValues(): Promise<MetadataRow[]> {
   const result = await execQuery(query);
   if (!result) return [];
   return result.rows;
+}
+
+export async function getDisplayFileSummary(): Promise<DisplayFileSummary> {
+  const summaryQuery = {
+    text: `
+      WITH artist_counts AS (
+        SELECT
+          artist,
+          COUNT(*) AS total_files,
+          COUNT(*) FILTER (WHERE nsfw = true) AS nsfw_files,
+          COUNT(*) FILTER (WHERE nsfw = false) AS sfw_files
+        FROM display_files
+        WHERE artist IS NOT NULL
+        GROUP BY artist
+      )
+      SELECT
+        COUNT(*) AS total_files,
+        COUNT(*) FILTER (WHERE nsfw = true) AS nsfw_files,
+        COUNT(*) FILTER (WHERE nsfw = false) AS sfw_files,
+        COUNT(DISTINCT artist) AS total_artists,
+        ROUND(CAST(100.0 * COUNT(*) FILTER (WHERE nsfw = false) / NULLIF(COUNT(*), 0) AS numeric), 2) AS sfw_pct,
+        ROUND(CAST(100.0 * COUNT(*) FILTER (WHERE nsfw = true) / NULLIF(COUNT(*), 0) AS numeric), 2) AS nsfw_pct,
+        COALESCE((SELECT ROUND(CAST(AVG(total_files) AS numeric), 2) FROM artist_counts), 0) AS avg_files_per_artist,
+        COALESCE((SELECT ROUND(CAST(PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY total_files) AS numeric), 2) FROM artist_counts), 0) AS median_files_per_artist,
+        COALESCE((SELECT ROUND((CAST(MAX(total_files) AS numeric) / NULLIF(AVG(total_files), 0)), 2) FROM artist_counts), 0) AS concentration_ratio
+      FROM display_files
+    `,
+  };
+
+  const topArtistsQuery = {
+    text: `
+      SELECT
+        artist,
+        COUNT(*) AS total_files,
+        COUNT(*) FILTER (WHERE nsfw = true) AS nsfw_files,
+        COUNT(*) FILTER (WHERE nsfw = false) AS sfw_files,
+        ROUND(CAST(100.0 * COUNT(*) / NULLIF((SELECT COUNT(*) FROM display_files), 0) AS numeric), 2) AS share_pct
+      FROM display_files
+      WHERE artist IS NOT NULL
+      GROUP BY artist
+      ORDER BY total_files DESC, artist ASC
+      LIMIT 10
+    `,
+  };
+
+  const [summaryResult, topArtistsResult] = await Promise.all([
+    execQuery(summaryQuery),
+    execQuery(topArtistsQuery),
+  ]);
+
+  const summaryRow = summaryResult?.rows[0] ?? {
+    total_files: 0,
+    total_artists: 0,
+    sfw_files: 0,
+    nsfw_files: 0,
+    sfw_pct: 0,
+    nsfw_pct: 0,
+    avg_files_per_artist: 0,
+    median_files_per_artist: 0,
+    concentration_ratio: 0,
+  };
+
+  return {
+    total_files: Number(summaryRow.total_files ?? 0),
+    total_artists: Number(summaryRow.total_artists ?? 0),
+    sfw_files: Number(summaryRow.sfw_files ?? 0),
+    nsfw_files: Number(summaryRow.nsfw_files ?? 0),
+    sfw_pct: Number(summaryRow.sfw_pct ?? 0),
+    nsfw_pct: Number(summaryRow.nsfw_pct ?? 0),
+    avg_files_per_artist: Number(summaryRow.avg_files_per_artist ?? 0),
+    median_files_per_artist: Number(summaryRow.median_files_per_artist ?? 0),
+    concentration_ratio: Number(summaryRow.concentration_ratio ?? 0),
+    top_artists: topArtistsResult?.rows ?? [],
+    artist_breakdown: topArtistsResult?.rows ?? [],
+  };
 }
 
 export async function getScanRunHistory(

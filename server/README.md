@@ -59,10 +59,18 @@ The server exposes endpoints for image retrieval, metadata management, and scann
 - `/api/metadata/get` and `/api/metadata/get/all` — metadata read endpoints
 - `/api/metadata` — metadata create/update endpoint
 - `/statistics` — statistics landing page with links to domain-specific dashboards
+- `/statistics/display-files` — current catalog snapshot dashboard
 - `/statistics/scan-runs` — scanner run history dashboard
 - `/statistics/image-serves` — image serve analytics dashboard
+- `/api/statistics/display_files` — return live catalog snapshot metrics from the `display_files` table
 - `/api/statistics/run_history` — return scanner run summaries from the `scan_runs` table
 - `/api/statistics/image_serves` — return image serve aggregates from the `image_serve_events` table
+
+### `/api/statistics/display_files`
+
+Returns a live snapshot of the current `display_files` catalog. The response includes the total inventory, SFW/NSFW split, distinct artist count, per-artist file counts with share of the total, and summary concentration metrics such as average files per artist and median files per artist.
+
+This endpoint is intentionally current-state only and reads directly from the live `display_files` table rather than from historical analytics tables.
 
 ### `/api/statistics/run_history`
 
