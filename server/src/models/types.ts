@@ -69,7 +69,10 @@ export interface DisplayFileSummary {
   avg_files_per_artist: number;
   median_files_per_artist: number;
   concentration_ratio: number;
+  top_10_artists_share_pct: number;
   top_artists: ArtistInventoryStat[];
+  top_nsfw_artists: ArtistInventoryStat[];
+  top_sfw_artists: ArtistInventoryStat[];
   artist_breakdown: ArtistInventoryStat[];
 }
 

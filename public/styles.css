@@ -290,6 +290,13 @@ body::-webkit-scrollbar-button {
   gap: 1rem;
 }
 
+.artist-rank-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
 .stat-card {
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);

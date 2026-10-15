@@ -57,13 +57,55 @@
           <span class="stat-label">Median files / artist</span>
           <strong id="stat-median-files" class="stat-value">0</strong>
         </article>
+        <article class="stat-card">
+          <span class="stat-label">Top 10 artists share</span>
+          <strong id="stat-top-10-artists-share" class="stat-value">0%</strong>
+        </article>
         <article class="stat-card wide">
           <span class="stat-label">Concentration ratio</span>
-          <strong id="stat-concentration-ratio" class="stat-value">0</strong>
+          <strong id="stat-concentration-ratio" class="stat-value" title="">0</strong>
         </article>
       </section>
 
-      <section class="stats-panel">
+      <section class="artist-rank-grid" aria-label="Artist rating leaders">
+        <div class="stats-panel">
+          <div class="panel-header">
+            <h2>Top 5 NSFW-heavy artists</h2>
+          </div>
+          <div class="table-wrap">
+            <table class="history-table">
+              <thead>
+                <tr>
+                  <th>Artist</th>
+                  <th>NSFW</th>
+                  <th>Share</th>
+                </tr>
+              </thead>
+              <tbody id="top-nsfw-artists-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="stats-panel">
+          <div class="panel-header">
+            <h2>Top 5 SFW-heavy artists</h2>
+          </div>
+          <div class="table-wrap">
+            <table class="history-table">
+              <thead>
+                <tr>
+                  <th>Artist</th>
+                  <th>SFW</th>
+                  <th>Share</th>
+                </tr>
+              </thead>
+              <tbody id="top-sfw-artists-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="stats-panel" style="margin-top: 1rem;">
         <div class="panel-header">
           <h2>Top artists by inventory share</h2>
         </div>

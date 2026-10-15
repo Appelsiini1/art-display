@@ -246,9 +246,86 @@ export async function getDisplayFileSummary(): Promise<DisplayFileSummary> {
     `,
   };
 
-  const [summaryResult, topArtistsResult] = await Promise.all([
+  const topNsfwArtistsQuery = {
+    text: `
+      WITH artist_counts AS (
+        SELECT
+          artist,
+          COUNT(*) AS total_files,
+          COUNT(*) FILTER (WHERE nsfw = true) AS nsfw_files,
+          COUNT(*) FILTER (WHERE nsfw = false) AS sfw_files
+        FROM display_files
+        WHERE artist IS NOT NULL
+        GROUP BY artist
+      )
+      SELECT
+        artist,
+        total_files,
+        sfw_files,
+        nsfw_files,
+        ROUND(CAST(100.0 * nsfw_files / NULLIF(total_files, 0) AS numeric), 2) AS share_pct
+      FROM artist_counts
+      ORDER BY share_pct DESC, total_files DESC, artist ASC
+      LIMIT 5
+    `,
+  };
+
+  const topSfwArtistsQuery = {
+    text: `
+      WITH artist_counts AS (
+        SELECT
+          artist,
+          COUNT(*) AS total_files,
+          COUNT(*) FILTER (WHERE nsfw = true) AS nsfw_files,
+          COUNT(*) FILTER (WHERE nsfw = false) AS sfw_files
+        FROM display_files
+        WHERE artist IS NOT NULL
+        GROUP BY artist
+      )
+      SELECT
+        artist,
+        total_files,
+        sfw_files,
+        nsfw_files,
+        ROUND(CAST(100.0 * sfw_files / NULLIF(total_files, 0) AS numeric), 2) AS share_pct
+      FROM artist_counts
+      ORDER BY share_pct DESC, total_files DESC, artist ASC
+      LIMIT 5
+    `,
+  };
+
+  const top10ShareQuery = {
+    text: `
+      WITH artist_counts AS (
+        SELECT
+          artist,
+          COUNT(*) AS total_files
+        FROM display_files
+        WHERE artist IS NOT NULL
+        GROUP BY artist
+      ),
+      top_10_artists AS (
+        SELECT total_files
+        FROM artist_counts
+        ORDER BY total_files DESC, artist ASC
+        LIMIT 10
+      )
+      SELECT
+        ROUND(
+          CAST(
+            100.0 * COALESCE((SELECT SUM(total_files) FROM top_10_artists), 0) / NULLIF((SELECT COUNT(*) FROM display_files), 0) AS numeric
+          ),
+          2
+        ) AS top_10_artists_share_pct
+    `,
+  };
+
+  const [summaryResult, topArtistsResult, topNsfwArtistsResult, topSfwArtistsResult, top10ShareResult] = await Promise.all([
     execQuery(summaryQuery),
     execQuery(topArtistsQuery),
+    execQuery(topNsfwArtistsQuery),
+    execQuery(topSfwArtistsQuery),
+    execQuery(top10ShareQuery),
   ]);
 
   const summaryRow = summaryResult?.rows[0] ?? {
@@ -273,7 +350,10 @@ export async function getDisplayFileSummary(): Promise<DisplayFileSummary> {
     avg_files_per_artist: Number(summaryRow.avg_files_per_artist ?? 0),
     median_files_per_artist: Number(summaryRow.median_files_per_artist ?? 0),
     concentration_ratio: Number(summaryRow.concentration_ratio ?? 0),
+    top_10_artists_share_pct: Number(top10ShareResult?.rows[0]?.top_10_artists_share_pct ?? 0),
     top_artists: topArtistsResult?.rows ?? [],
+    top_nsfw_artists: topNsfwArtistsResult?.rows ?? [],
+    top_sfw_artists: topSfwArtistsResult?.rows ?? [],
     artist_breakdown: topArtistsResult?.rows ?? [],
   };
 }
