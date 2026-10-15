@@ -7,6 +7,7 @@ import {
   ScanRunSummary,
 } from "../models/types";
 import { logMessage } from "./util";
+import { stripScannerPathPrefix } from "./util";
 
 const dbContext: { pool: null | Pool } = {
   pool: null,
@@ -348,13 +349,18 @@ export async function getImageServeSummary(
     nsfw_pct: 0,
   };
 
+  const topFiles = (topFilesResult?.rows ?? []).map((row) => ({
+    ...row,
+    file_path: stripScannerPathPrefix(row.file_path),
+  }));
+
   return {
     total_serves: Number(summaryRow.total_serves ?? 0),
     sfw_serves: Number(summaryRow.sfw_serves ?? 0),
     nsfw_serves: Number(summaryRow.nsfw_serves ?? 0),
     sfw_pct: Number(summaryRow.sfw_pct ?? 0),
     nsfw_pct: Number(summaryRow.nsfw_pct ?? 0),
-    top_files: topFilesResult?.rows ?? [],
+    top_files: topFiles,
     top_artists: topArtistsResult?.rows ?? [],
     artist_breakdown: artistBreakdownResult?.rows ?? [],
   };

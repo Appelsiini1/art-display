@@ -63,3 +63,22 @@ export function logMessage(
     console.warn(message);
   }
 }
+
+export function stripScannerPathPrefix(filePath: string, scannerRoot?: string) {
+  const normalizedFilePath = filePath.replace(/\\/g, "/");
+  const configuredRoot = (scannerRoot ?? process.env.SCANNER_PATH ?? process.env.SCANDIR ?? "")
+    .replace(/\\/g, "/")
+    .replace(/\/+$/, "");
+
+  if (!configuredRoot) {
+    return normalizedFilePath;
+  }
+
+  const relativePath = path.relative(configuredRoot, normalizedFilePath);
+
+  if (!relativePath || relativePath === "." || relativePath.startsWith("..")) {
+    return normalizedFilePath;
+  }
+
+  return relativePath.replace(/\\/g, "/");
+}
