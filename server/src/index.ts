@@ -1,315 +1,34 @@
 import express from "express";
 import path from "node:path";
-import { query, validationResult } from "express-validator";
-import {
-  allMetadataValues,
-  getDisplayFileById,
-  getDisplayFileSummary,
-  getImageServeSummary,
-  getMetadataValue,
-  getRandomDisplayFile,
-  getScanRunHistory,
-  initDbTables,
-  insertRow,
-  recordImageServeEvent,
-  updateRow,
-} from "./modules/database";
-import { getFile, logMessage, transfromToDTO } from "./modules/util";
-import { isSafeImagePath } from "./modules/fileSecurity";
+import { initDbTables } from "./modules/database";
+import { logMessage } from "./modules/util";
+import imageRoutes from "./routes/imageRoutes";
+import metadataRoutes from "./routes/metadataRoutes";
+import statisticsRoutes from "./routes/statisticsRoutes";
 
 const PORT = 9000;
 const app = express();
-let DB_INIT = 0;
+app.locals.dbReady = 0;
 
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.json());
 
-// Set a Content-Security-Policy response header allowing images from the
-// configured API host (or the current host). This is preferable to a static
-// meta tag because it can be computed from environment/config at runtime.
 app.use((req, res, next) => {
   const apiHost = process.env.IMG_API_URL || `${req.protocol}://${req.headers.host}`;
   const csp = `default-src 'self'; img-src 'self' data: blob: ${apiHost}; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'`;
-  res.setHeader('Content-Security-Policy', csp);
+  res.setHeader("Content-Security-Policy", csp);
   next();
 });
 
+app.use(imageRoutes);
+app.use(metadataRoutes);
+app.use(statisticsRoutes);
+
 initDbTables().then(() => {
   app.listen(PORT, () => {
+    app.locals.dbReady = 1;
     logMessage(`Server online at http://localhost:${PORT}`, "info");
-    DB_INIT = 1;
   });
 });
 
-//URL/api/img/file?id=value
-app.get("/api/img/file", query("id").trim().notEmpty(), async (req, res) => {
-  const result = validationResult(req);
-  try {
-    if (result.isEmpty()) {
-      const imgInfo = await getDisplayFileById(req.query?.id);
-      if (!imgInfo)
-        throw new Error(`Database call failed for file id ${req.query?.id}.`);
-      if (typeof imgInfo == "undefined") {
-        res
-          .status(404)
-          .send(`File with '${req.query?.id}' not found in the database.`);
-      } else {
-        const safe = await isSafeImagePath(imgInfo.path);
-        if (!safe) {
-          res.status(404).send("File not found.");
-          return;
-        }
-        getFile(res, imgInfo.path)
-      }
-    } else {
-      res.status(400).send("Invalid request.");
-    }
-  } catch (err: any) {
-    res.status(500).send("Internal Server Error");
-    logMessage(err.message, "error");
-  }
-});
-app.get("/api/status", async (req, res) => {
-  if (DB_INIT === 1) {
-    res.status(200).send({ ready: true });
-  } else {
-    res.status(200).send({ ready: false });
-  }
-});
-
-app.get("/statistics", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "statistics", "index.html"));
-});
-
-app.get("/statistics.html", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "statistics", "index.html"));
-});
-
-app.get("/statistics/scan-runs", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "statistics", "scan-runs.html"));
-});
-
-app.get("/statistics/display-files", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "statistics", "display-files.html"));
-});
-
-app.get("/statistics/image-serves", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "statistics", "image-serves.html"));
-});
-
-app.get("/api/statistics/run_history", async (req, res) => {
-  const hoursParam = req.query.hours?.toString();
-  const sinceParam = req.query.since?.toString();
-
-  if (hoursParam && sinceParam) {
-    res.status(400).send("Use either 'hours' or 'since', not both.");
-    return;
-  }
-
-  try {
-    let since: Date | undefined;
-
-    if (sinceParam) {
-      const parsedSince = new Date(sinceParam);
-      if (Number.isNaN(parsedSince.getTime())) {
-        res.status(400).send("Invalid 'since' timestamp.");
-        return;
-      }
-      since = parsedSince;
-    } else if (hoursParam) {
-      const hours = Number(hoursParam);
-      if (!Number.isFinite(hours) || hours <= 0) {
-        res.status(400).send("'hours' must be a positive number.");
-        return;
-      }
-      since = new Date(Date.now() - hours * 60 * 60 * 1000);
-    }
-
-    const history = await getScanRunHistory(since);
-    res.status(200).json(history);
-  } catch (err: any) {
-    res.status(500).send("Internal Server Error");
-    logMessage(err.message, "error");
-  }
-});
-
-app.get("/api/statistics/display_files", async (req, res) => {
-  try {
-    const summary = await getDisplayFileSummary();
-    res.status(200).json(summary);
-  } catch (err: any) {
-    res.status(500).send("Internal Server Error");
-    logMessage(err.message, "error");
-  }
-});
-
-app.get("/api/statistics/image_serves", async (req, res) => {
-  const hoursParam = req.query.hours?.toString();
-  const sinceParam = req.query.since?.toString();
-
-  if (hoursParam && sinceParam) {
-    res.status(400).send("Use either 'hours' or 'since', not both.");
-    return;
-  }
-
-  try {
-    let since: Date | undefined;
-
-    if (sinceParam) {
-      const parsedSince = new Date(sinceParam);
-      if (Number.isNaN(parsedSince.getTime())) {
-        res.status(400).send("Invalid 'since' timestamp.");
-        return;
-      }
-      since = parsedSince;
-    } else if (hoursParam) {
-      const hours = Number(hoursParam);
-      if (!Number.isFinite(hours) || hours <= 0) {
-        res.status(400).send("'hours' must be a positive number.");
-        return;
-      }
-      since = new Date(Date.now() - hours * 60 * 60 * 1000);
-    }
-
-    const summary = await getImageServeSummary(since);
-    res.status(200).json(summary);
-  } catch (err: any) {
-    res.status(500).send("Internal Server Error");
-    logMessage(err.message, "error");
-  }
-});
-
-//URL/api/img?id=value
-app.get("/api/img", query("id").trim().notEmpty(), async (req, res) => {
-  const result = validationResult(req);
-  try {
-    if (result.isEmpty()) {
-      const imgInfo = await getDisplayFileById(req.query?.id);
-      if (!imgInfo)
-        throw new Error(`Database call failed for file id ${req.query?.id}.`);
-
-      if (typeof imgInfo == "undefined") {
-        res
-          .status(404)
-          .send(`File with '${req.query?.id}' not found in the database.`);
-      } else {
-        res.status(200).json(transfromToDTO(imgInfo));
-      }
-    } else {
-      res.status(400).send("Invalid request.");
-    }
-  } catch (err: any) {
-    if (err.message == -1) {
-      res
-        .status(404)
-        .send(`File with '${req.query?.id}' not found in the database.`);
-    } else {
-      res.status(500).send("Internal Server Error");
-      logMessage(err.message, "error");
-    }
-  }
-});
-
-app.get("/api/img/random", async (req, res) => {
-  try {
-    const rating = await getMetadataValue("currentRating");
-    const activeRating = rating ? rating.value : "sfw";
-    const maxAttempts = 10;
-    let attempts = 0;
-    let imgInfo: any = undefined;
-    while (attempts < maxAttempts) {
-      const candidate = await getRandomDisplayFile(activeRating);
-      if (!candidate) {
-        attempts += 1;
-        continue;
-      }
-      const safe = await isSafeImagePath(candidate.path);
-      if (!safe) {
-        attempts += 1;
-        logMessage(`Skipping invalid image candidate`, "warn");
-        continue;
-      }
-      imgInfo = candidate;
-      break;
-    }
-    if (!imgInfo) {
-      res.status(404).send("No valid images available.");
-      return;
-    }
-
-    const serveRating = imgInfo.nsfw ? "nsfw" : "sfw";
-    await recordImageServeEvent(
-      imgInfo.id,
-      imgInfo.path,
-      imgInfo.artist ?? null,
-      serveRating,
-    );
-
-    logMessage(`Serving '${imgInfo.path}'`, "info");
-    res.status(200).json(transfromToDTO(imgInfo));
-  } catch (err: any) {
-    res.status(500).send("Internal Server Error");
-    logMessage(err.message, "error");
-  }
-});
-
-//URL/api/metadata?name=value
-app.post("/api/metadata", async (req, res) => {
-  const valueID = req.query.name?.toString();
-  const value = req.query.value?.toString();
-
-  if (!value || !valueID) {
-    res.status(400).send("Parameters missing");
-  } else {
-    try {
-      const prev_value = await getMetadataValue(valueID);
-      if (prev_value == undefined) {
-        await insertRow("metadata", { name: valueID, value });
-        res
-          .status(200)
-          .send(`Added metadata value with id ${valueID} to database.`);
-      } else {
-        await updateRow(
-          "metadata",
-          { value },
-          { name: valueID },
-        );
-        res
-          .status(200)
-          .send(`Updated metadata value with id ${valueID} in the database.`);
-      }
-    } catch (err: any) {
-      res.status(500).send("Internal Server Error");
-      logMessage(err.message, "error");
-    }
-  }
-});
-
-//URL/api/metadata/get?name=value
-app.get("/api/metadata/get", query("name").trim().notEmpty(), async (req, res) => {
-  const result = validationResult(req);
-  if (result.isEmpty()) {
-    try {
-      const result = await getMetadataValue(req.query?.name);
-      logMessage(`Serving metadata value with id ${req.query?.name}. Value: ${result?.value}`, "info");
-
-      res.status(200).send({ id: req.query?.name, value: result?.value });
-    } catch (err: any) {
-      res.status(500).send("Internal Server Error");
-      logMessage(err.message, "error");
-    }
-  }
-});
-
-//URL/api/metadata/get/all
-app.get("/api/metadata/get/all", async (req, res) => {
-  try {
-    const result = await allMetadataValues();
-    logMessage(`Serving all metadata values. Count: ${result.length}`, "info");
-
-    res.status(200).send({ metadata: result });
-  } catch (err: any) {
-    res.status(500).send("Internal Server Error");
-    logMessage(err.message, "error");
-  }
-});
+export default app;

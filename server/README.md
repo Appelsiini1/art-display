@@ -9,12 +9,23 @@ The server is the main API layer for art-display. It serves the browser UI, expo
 - Validate image paths before serving files to prevent unsafe access.
 - Coordinate with the database schema used by the scanner and frontend.
 
-## Runtime entry points
+## Runtime structure
 
-- `src/index.ts` — Express app, routes, and startup logic.
-- `src/modules/database.ts` — database queries and writes.
+The server is organized into separate layers so the entry file stays lightweight and the code ownership is explicit:
+
+- `src/index.ts` — Express startup and global middleware.
+- `src/routes/` — HTTP handlers for image, metadata, and statistics endpoints.
+- `src/services/` — business logic and orchestration for image serving, metadata writes, and analytics queries.
+- `src/repositories/` — data access wrappers around the database-level query helpers.
+- `src/modules/database.ts` — database bootstrap and lower-level query logic.
 - `src/modules/fileSecurity.ts` — file path security checks.
 - `src/modules/util.ts` — helpers for file serving and logging.
+
+## Module ownership
+
+- Route modules own request validation and HTTP response shaping.
+- Service modules own the orchestration rules, such as safe image selection and rating handling.
+- Repository modules own database-facing calls and keep the route layer from directly depending on the query implementation.
 
 ## Local development
 
