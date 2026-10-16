@@ -133,13 +133,34 @@ export async function getImageServeSummary(
     values: [cutoff.toISOString()],
   };
 
-  const [summaryResult, topFilesResult, topArtistsResult, artistBreakdownResult] =
-    await Promise.all([
-      execQuery(summaryQuery),
-      execQuery(topFilesQuery),
-      execQuery(topArtistsQuery),
-      execQuery(artistBreakdownQuery),
-    ]);
+  const latestServedQuery = {
+    text: `
+      SELECT
+        file_id,
+        file_path,
+        artist,
+        rating,
+        served_at
+      FROM image_serve_events
+      ORDER BY served_at DESC
+      LIMIT 10
+    `,
+    values: [],
+  };
+
+  const [
+    summaryResult,
+    topFilesResult,
+    topArtistsResult,
+    artistBreakdownResult,
+    latestServedResult,
+  ] = await Promise.all([
+    execQuery(summaryQuery),
+    execQuery(topFilesQuery),
+    execQuery(topArtistsQuery),
+    execQuery(artistBreakdownQuery),
+    execQuery(latestServedQuery),
+  ]);
 
   const summaryRow = summaryResult?.rows[0] ?? {
     total_serves: 0,
@@ -154,6 +175,11 @@ export async function getImageServeSummary(
     file_path: stripScannerPathPrefix(row.file_path),
   }));
 
+  const latestServed = (latestServedResult?.rows ?? []).map((row) => ({
+    ...row,
+    file_path: stripScannerPathPrefix(row.file_path),
+  }));
+
   return {
     total_serves: Number(summaryRow.total_serves ?? 0),
     sfw_serves: Number(summaryRow.sfw_serves ?? 0),
@@ -163,5 +189,6 @@ export async function getImageServeSummary(
     top_files: topFiles,
     top_artists: topArtistsResult?.rows ?? [],
     artist_breakdown: artistBreakdownResult?.rows ?? [],
+    latest_served: latestServed,
   };
 }

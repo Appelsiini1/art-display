@@ -85,6 +85,7 @@ export interface ImageServeSummary {
   top_files: TopFileStat[];
   top_artists: TopArtistStat[];
   artist_breakdown: TopArtistStat[];
+  latest_served: ImageServeEvent[];
 }
 
 export type QueryConfig = {

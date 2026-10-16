@@ -7,6 +7,7 @@ const rangeSelect = document.getElementById("range-select");
 const statusMessage = document.getElementById("status-message");
 const topFilesBody = document.getElementById("top-files-body");
 const topArtistsBody = document.getElementById("top-artists-body");
+const latestServedBody = document.getElementById("latest-served-body");
 
 const statFields = {
   total: document.getElementById("stat-total"),
@@ -24,6 +25,26 @@ function setStatus(message, isError = false) {
 function safeNumber(value) {
   const number = Number(value);
   return Number.isFinite(number) ? number : 0;
+}
+
+function formatTimestamp(value) {
+  if (!value) {
+    return "n/a";
+  }
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return "n/a";
+  }
+
+  const pad = (n) => String(n).padStart(2, "0");
+  const day = pad(date.getDate());
+  const month = pad(date.getMonth() + 1);
+  const year = date.getFullYear();
+  const hours = pad(date.getHours());
+  const minutes = pad(date.getMinutes());
+
+  return `${day}.${month}.${year} ${hours}:${minutes}`;
 }
 
 function renderSummary(summary) {
@@ -74,6 +95,16 @@ async function fetchSummary(hours) {
     renderSummary(summary ?? {});
     renderTableBody(topFilesBody, summary?.top_files ?? [], "No files found in the selected time range.");
     renderTableBody(topArtistsBody, summary?.top_artists ?? [], "No artists found in the selected time range.");
+    (summary?.latest_served ?? []).forEach((row) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${row.file_path ?? "Unknown"}</td>
+        <td>${row.artist ?? "Unknown"}</td>
+        <td>${row.rating === "nsfw" ? "NSFW" : "SFW"}</td>
+        <td>${formatTimestamp(row.served_at)}</td>
+      `;
+      latestServedBody.appendChild(tr);
+    });
     setStatus(`Loaded aggregate usage for the selected ${hours}-hour window.`);
   } catch (error) {
     console.error(error);
