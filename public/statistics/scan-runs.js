@@ -9,7 +9,7 @@ const historyTableBody = document.getElementById("history-table-body");
 
 const statFields = {
   runs: document.getElementById("stat-runs"),
-  scanned: document.getElementById("stat-scanned"),
+  deleted: document.getElementById("stat-deleted"),
   processed: document.getElementById("stat-processed"),
   errors: document.getElementById("stat-errors"),
   nsfw: document.getElementById("stat-nsfw"),
@@ -68,7 +68,7 @@ function formatTimestamp(value) {
 
 function renderSummary(rows) {
   const totalRuns = rows.length;
-  const totalScanned = rows.reduce((sum, row) => sum + safeNumber(row.scanned), 0);
+  const totalDeleted = rows.reduce((sum, row) => sum + safeNumber(row.display_deleted), 0);
   const totalProcessed = rows.reduce((sum, row) => sum + safeNumber(row.processed), 0);
   const totalErrors = rows.reduce((sum, row) => sum + safeNumber(row.errors), 0);
   const totalNsfw = rows.reduce((sum, row) => sum + safeNumber(row.nsfw_hits), 0);
@@ -82,7 +82,7 @@ function renderSummary(rows) {
       : 0;
 
   statFields.runs.textContent = totalRuns.toLocaleString();
-  statFields.scanned.textContent = totalScanned.toLocaleString();
+  statFields.deleted.textContent = totalDeleted.toLocaleString();
   statFields.processed.textContent = totalProcessed.toLocaleString();
   statFields.errors.textContent = totalErrors.toLocaleString();
   statFields.nsfw.textContent = totalNsfw.toLocaleString();
@@ -110,8 +110,8 @@ function renderHistory(rows) {
       <td>${formatTimestamp(row.started_at)}</td>
       <td>${formatTimestamp(row.finished_at)}</td>
       <td>${formatDuration(row.duration_ms)}</td>
-      <td>${safeNumber(row.scanned).toLocaleString()}</td>
       <td>${safeNumber(row.processed).toLocaleString()}</td>
+      <td>${safeNumber(row.display_deleted).toLocaleString()}</td>
       <td>${safeNumber(row.nsfw_hits).toLocaleString()}</td>
       <td>${safeNumber(row.sfw_hits).toLocaleString()}</td>
       <td>${safeNumber(row.errors).toLocaleString()}</td>
