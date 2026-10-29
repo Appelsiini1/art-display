@@ -54,9 +54,26 @@ services:
     volumes:
       - /mnt/r:/mnt/r:ro
 
+  tagger:
+    build:
+      context: ./tagger
+      dockerfile: Dockerfile
+    devices:
+      - /dev/kfd
+      - /dev/dri
+    security_opt:
+      - label=disable
+    shm_size: 4g
+    volumes:
+      - /mnt/r:/images
+      - hf-cache:/root/.cache/huggingface
+    groups:
+      - video
+
 networks:
   backend:
     driver: bridge
 
 volumes:
   pgdata:
+  hf-cache:
