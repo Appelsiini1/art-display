@@ -4,11 +4,10 @@ import {
   displayFileDeleteWriter,
   selectAllFingerprintPaths,
   deleteStaleFingerprintsAndDisplayFiles,
+  initDbTables,
 } from "./modules/db";
 import {
-  getDBStatus,
   logMessage,
-  waitForDb,
   RECONCILE_MAX_STALE_FRACTION,
   RECONCILE_FORCE,
 } from "./modules/util";
@@ -78,9 +77,9 @@ async function main() {
     dirPatterns: [],
   };
 
-  logMessage("Waiting for DB to be ready...", "info");
-  await waitForDb(500, 30_000); // poll every 500ms, give up after 30s
-  logMessage("DB ready, starting scan loop.", "info");
+  logMessage("Ensuring scanner schema is present...", "info");
+  await initDbTables();
+
 
   let running = false;
   const runScan = async () => {
@@ -94,7 +93,6 @@ async function main() {
       } catch (err: any) {
         logMessage(`Metrics startRun error: ${err && err.message ? err.message : err}`, "warn");
       }
-      if (!(await getDBStatus())) return;
       logMessage("Starting scan...", "info");
 
       try {

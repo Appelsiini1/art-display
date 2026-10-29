@@ -46,23 +46,6 @@ function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-export async function waitForDb(pollMs = 500, timeoutMs?: number) {
-  const start = Date.now();
-  while (true) {
-    try {
-      if (await getDBStatus()) return;
-    } catch {
-      // ignore transient errors while DB is coming up
-    }
-    if (timeoutMs && Date.now() - start > timeoutMs) {
-      throw new Error(
-        `Timed out after ${timeoutMs}ms waiting for DB to be ready`,
-      );
-    }
-    await sleep(pollMs);
-  }
-}
-
 export async function computeFingerprint(
   filePath: string,
   stat: fs.Stats,
@@ -136,20 +119,6 @@ export function containsIgnoreTags(tagList: string[]): Boolean {
 export function extractArtist(filePath: string) {
   const match = filePath.match(ARTIST_RE);
   return match ? match[1] : null;
-}
-
-export function getDBStatus(): Promise<Boolean> {
-  return new Promise((resolve, reject) => {
-    fetch(new Request("http://api:9000/api/status"))
-      .then(async (response) => {
-        const resJson = await response.json();
-        resolve(resJson.ready ? true : false);
-      })
-      .catch((reason) => {
-        console.error(reason);
-        reject(reason);
-      });
-  });
 }
 
 export function stripXmpExtension(filePath: string): string {
