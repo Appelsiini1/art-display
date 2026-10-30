@@ -58,17 +58,20 @@ services:
     build:
       context: ./tagger
       dockerfile: Dockerfile
-    devices:
-      - /dev/kfd
-      - /dev/dri
-    security_opt:
-      - label=disable
-    shm_size: 4g
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      TAGGER_IMAGE_ROOT: /images
+      TAGGER_EXECUTION_MODE: serial
+      IMAGE_ROOT: ${IMAGE_ROOT}
+      LOG_LEVEL: DEBUG #${LOG_LEVEL}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - backend
     volumes:
       - /mnt/r:/images
       - hf-cache:/root/.cache/huggingface
-    groups:
-      - video
 
 networks:
   backend:

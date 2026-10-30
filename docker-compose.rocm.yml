@@ -1,0 +1,8 @@
+services:
+  tagger:
+    devices:
+      - /dev/kfd:/dev/kfd
+      - /dev/dri:/dev/dri
+    security_opt:
+      - label=disable
+    shm_size: 4g

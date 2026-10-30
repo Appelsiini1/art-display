@@ -1,6 +1,7 @@
 # Build
 FROM rocm/pytorch:latest
 WORKDIR /workspace/tagger
-COPY tagger ./
-RUN pip install --no-cache-dir -r requirements.txt
-CMD ["python", "tagger.py"]
+COPY requirements.txt ./
+RUN python3 -m pip install --no-cache-dir -r requirements.txt
+COPY . ./
+CMD ["python3", "tagger.py", "--limit", "10"]

@@ -69,6 +69,30 @@ docker compose up --build
 
 This builds and starts the server and scanner processes according to the repository configuration.
 
+### Compose variants for the tagger
+
+The default compose setup is intentionally CPU-safe and does not attach AMD ROCm GPU devices. This keeps `docker compose up` working on machines without `/dev/kfd`, including NVIDIA hosts.
+
+Use the default compose file for normal local running/development:
+
+```bash
+docker compose up --build
+```
+
+If the host machine has AMD ROCm support and you want the tagger to access the GPU devices directly, add the ROCm override file:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.rocm.yml up --build
+```
+
+The AMD-specific overrides live in `docker-compose.rocm.yml` and include the `/dev/kfd` and `/dev/dri` device mappings plus the extra shared-memory settings required for ROCm.
+
+You can validate the current configuration without starting the stack with:
+
+```bash
+docker compose -f docker-compose.yml config
+```
+
 ## Deployment
 
 - The app is designed to run with Docker Compose for local development and a kiosk deployment setup for display hardware.
