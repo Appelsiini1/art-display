@@ -56,7 +56,7 @@ Before starting, create a `.env` file in the repository root with the required v
 POSTGRES_USER=
 POSTGRES_PASSWORD=""
 POSTGRES_DB=artdisplay
-SCANNER_PATH="/path/to/your/archive/root"
+IMAGE_ROOT="/path/to/your/archive/root"
 IGNORE_TAGS=""
 LOG_LEVEL="info"
 ```
@@ -96,7 +96,7 @@ docker compose -f docker-compose.yml config
 ## Deployment
 
 - The app is designed to run with Docker Compose for local development and a kiosk deployment setup for display hardware.
-- [kiosk/README.md](kiosk/README.md)` covers the browser startup workflow and systemd service files.
+- [kiosk/README.md](kiosk/README.md) covers the browser startup workflow and systemd service files.
 - The server and scanner each include their own Dockerfiles and package-level build scripts.
 
 ## Docs and further reading

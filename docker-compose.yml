@@ -9,7 +9,7 @@ services:
       DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
       NODE_ENV: production
       LOG_LEVEL: ${LOG_LEVEL}
-      SCANNER_PATH: ${SCANNER_PATH}
+      IMAGE_ROOT: ${IMAGE_ROOT}
     depends_on:
       db:
         condition: service_healthy
@@ -42,7 +42,7 @@ services:
     environment:
       DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
       NODE_ENV: production
-      SCANDIR: ${SCANNER_PATH}
+      SCANDIR: ${IMAGE_ROOT}
       IGNORE_TAGS: ${IGNORE_TAGS}
       LOG_LEVEL: ${LOG_LEVEL}
     depends_on:
@@ -70,7 +70,7 @@ services:
     networks:
       - backend
     volumes:
-      - /mnt/r:/images
+      - ${IMAGE_ROOT}:/images
       - hf-cache:/root/.cache/huggingface
 
 networks:

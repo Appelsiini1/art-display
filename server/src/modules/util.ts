@@ -66,7 +66,7 @@ export function logMessage(
 
 export function stripScannerPathPrefix(filePath: string, scannerRoot?: string) {
   const normalizedFilePath = filePath.replace(/\\/g, "/");
-  const configuredRoot = (scannerRoot ?? process.env.SCANNER_PATH ?? process.env.SCANDIR ?? "")
+  const configuredRoot = (scannerRoot ?? process.env.IMAGE_ROOT ?? "")
     .replace(/\\/g, "/")
     .replace(/\/+$/, "");
 
