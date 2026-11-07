@@ -63,7 +63,7 @@ services:
       TAGGER_IMAGE_ROOT: /images
       TAGGER_EXECUTION_MODE: serial
       IMAGE_ROOT: ${IMAGE_ROOT}
-      LOG_LEVEL: DEBUG #${LOG_LEVEL}
+      LOG_LEVEL: ${LOG_LEVEL}
     depends_on:
       db:
         condition: service_healthy
