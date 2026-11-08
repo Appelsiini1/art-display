@@ -31,6 +31,7 @@ export async function initDbTables() {
     processed bigint NOT NULL DEFAULT 0,\
     fingerprints_updated bigint NOT NULL DEFAULT 0,\
     display_inserted bigint NOT NULL DEFAULT 0,\
+    display_ignored bigint NOT NULL DEFAULT 0,\
     display_deleted bigint NOT NULL DEFAULT 0,\
     errors bigint NOT NULL DEFAULT 0,\
     nsfw_hits bigint NOT NULL DEFAULT 0,\
@@ -38,6 +39,19 @@ export async function initDbTables() {
     duration_ms bigint,\
     metadata jsonb\
 );",
+  );
+
+  await execQuery(
+    "ALTER TABLE scan_runs ADD COLUMN IF NOT EXISTS display_ignored bigint NOT NULL DEFAULT 0;",
+  );
+  await execQuery(
+    "ALTER TABLE scan_runs ADD COLUMN IF NOT EXISTS display_deleted bigint NOT NULL DEFAULT 0;",
+  );
+  await execQuery(
+    `UPDATE scan_runs
+     SET display_ignored = GREATEST(COALESCE(display_ignored, 0), COALESCE(display_deleted, 0)),
+         display_deleted = GREATEST(COALESCE(display_ignored, 0), COALESCE(display_deleted, 0))
+     WHERE COALESCE(display_ignored, 0) <> COALESCE(display_deleted, 0);`,
   );
 
   await execQuery(

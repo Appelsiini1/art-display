@@ -23,6 +23,7 @@ export async function getScanRunHistory(
         processed,
         fingerprints_updated,
         display_inserted,
+        display_ignored,
         display_deleted,
         errors,
         nsfw_hits,

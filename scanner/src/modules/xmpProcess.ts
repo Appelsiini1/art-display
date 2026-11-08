@@ -79,7 +79,7 @@ export async function processOne(filePath: string, options: ScanOptions) {
     await displayFileDeleteWriter.add(stripXmpExtension(filePath));
     await fingerprintWriter.add({ path: filePath, ...fingerprint });
     inc("fingerprints_updated");
-    inc("display_deleted");
+    inc("display_ignored");
     inc("processed");
     return;
   }
@@ -105,7 +105,7 @@ export async function processOne(filePath: string, options: ScanOptions) {
       "debug",
     );
     await displayFileDeleteWriter.add(stripXmpExtension(filePath));
-    inc("display_deleted");
+    inc("display_ignored");
   }
   logMessage(
     `File '${filePath}' is new, adding fingerprint to database.`,

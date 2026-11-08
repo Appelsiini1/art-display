@@ -19,7 +19,8 @@ export interface ScanRunSummary {
   processed: number;
   fingerprints_updated: number;
   display_inserted: number;
-  display_deleted: number;
+  display_ignored: number;
+  display_deleted?: number;
   errors: number;
   nsfw_hits: number;
   sfw_hits: number;

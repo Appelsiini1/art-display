@@ -68,7 +68,10 @@ function formatTimestamp(value) {
 
 function renderSummary(rows) {
   const totalRuns = rows.length;
-  const totalDeleted = rows.reduce((sum, row) => sum + safeNumber(row.display_deleted), 0);
+  const totalIgnored = rows.reduce(
+    (sum, row) => sum + safeNumber(row.display_ignored ?? row.display_deleted),
+    0,
+  );
   const totalProcessed = rows.reduce((sum, row) => sum + safeNumber(row.processed), 0);
   const totalErrors = rows.reduce((sum, row) => sum + safeNumber(row.errors), 0);
   const totalNsfw = rows.reduce((sum, row) => sum + safeNumber(row.nsfw_hits), 0);
@@ -82,7 +85,7 @@ function renderSummary(rows) {
       : 0;
 
   statFields.runs.textContent = totalRuns.toLocaleString();
-  statFields.deleted.textContent = totalDeleted.toLocaleString();
+  statFields.deleted.textContent = totalIgnored.toLocaleString();
   statFields.processed.textContent = totalProcessed.toLocaleString();
   statFields.errors.textContent = totalErrors.toLocaleString();
   statFields.nsfw.textContent = totalNsfw.toLocaleString();
@@ -111,7 +114,7 @@ function renderHistory(rows) {
       <td>${formatTimestamp(row.finished_at)}</td>
       <td>${formatDuration(row.duration_ms)}</td>
       <td>${safeNumber(row.processed).toLocaleString()}</td>
-      <td>${safeNumber(row.display_deleted).toLocaleString()}</td>
+      <td>${safeNumber(row.display_ignored ?? row.display_deleted).toLocaleString()}</td>
       <td>${safeNumber(row.nsfw_hits).toLocaleString()}</td>
       <td>${safeNumber(row.sfw_hits).toLocaleString()}</td>
       <td>${safeNumber(row.errors).toLocaleString()}</td>
